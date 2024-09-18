@@ -1,0 +1,80 @@
+@import "../../styles/base.scss";
+.list {
+    margin-top: 1rem;
+
+    &_item {
+        padding: 10px;
+        background: $blue-color;
+        margin-top: 10px;
+        color: #fff;
+        font-weight: 600;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+       
+        @media (max-width: 800px) {
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        svg {
+            width: 22px;
+            height: 22px;
+            cursor: pointer;
+            margin-left: 1rem;
+        }
+
+        input {
+            padding: 1rem;
+            border: none;
+            outline: none;
+            color: #fff;
+            background: transparent;
+            cursor: pointer;
+        }
+
+        &_expand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+
+            button:hover {
+                background: $dark-blue-color;
+            }
+        }
+    }
+}
+.header{
+    font-weight: bold;
+    font-size: 30px;
+    color: #029af2;
+}
+.open {
+    background: #fff !important;
+    color: #111 !important;
+    border-radius: 10px;
+}
+.btnWrap {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 1rem;
+}
+
+.form_row {
+    display: flex;
+    align-items: center;
+    margin-top: 1rem;
+    gap: 1rem;
+    @media (max-width: 800px) {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
+
+.form_item {
+    flex: 0.5; 
+}
+.list_item{
+    border-radius: 10px;
+    background-color: #029af2;
+}

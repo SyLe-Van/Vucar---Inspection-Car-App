@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  vucar-app:
+    image: ${DOCKER_REGISTRY:-localhost}/${DOCKER_IMAGE_NAME:-vucar-app}:${DOCKER_TAG:-latest}
+    container_name: vucar-app-${ENVIRONMENT:-production}
+    ports:
+      - "${APP_PORT:-80}:3000"
+    environment:
+      - NODE_ENV=${ENVIRONMENT:-production}
+      - PORT=3000
+      - HOSTNAME=0.0.0.0
+      # Add your environment variables here
+      # - DATABASE_URL=${DATABASE_URL}
+      # - MONGODB_URI=${MONGODB_URI}
+      # - NEXTAUTH_SECRET=${NEXTAUTH_SECRET}
+      # - NEXTAUTH_URL=${NEXTAUTH_URL}
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "wget", "--no-verbose", "--tries=1", "--spider", "http://localhost:3000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+    networks:
+      - vucar-network
+    # Uncomment for volume mounts if needed
+    # volumes:
+    #   - ./uploads:/app/uploads
+    #   - ./logs:/app/logs
+
+  # Uncomment if you need a reverse proxy
+  # nginx:
+  #   image: nginx:alpine
+  #   container_name: vucar-nginx-${ENVIRONMENT:-production}
+  #   ports:
+  #     - "80:80"
+  #     - "443:443"
+  #   volumes:
+  #     - ./nginx.conf:/etc/nginx/nginx.conf:ro
+  #     - ./ssl:/etc/nginx/ssl:ro
+  #   depends_on:
+  #     - vucar-app
+  #   networks:
+  #     - vucar-network
+
+networks:
+  vucar-network:
+    driver: bridge
+
+# Uncomment for persistent data
+# volumes:
+#   vucar-data:

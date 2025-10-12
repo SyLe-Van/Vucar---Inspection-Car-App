@@ -31,6 +31,7 @@
 ## 📝 Cập Nhật Code
 
 - [ ] **Sửa Jenkinsfile:**
+
   ```groovy
   DOCKER_IMAGE_NAME = 'YOUR-DOCKERHUB-USERNAME/vucar-app'
   PRODUCTION_SERVER = 'YOUR-SERVER-IP-OR-DOMAIN'
@@ -63,6 +64,7 @@
 ## 🚀 Production Server Setup
 
 - [ ] **Tạo thư mục app:**
+
   ```bash
   sudo mkdir -p /opt/vucar-app
   sudo chown $USER:$USER /opt/vucar-app
@@ -81,6 +83,7 @@
 ## 🌐 Production Setup (Optional)
 
 - [ ] **Cài đặt Nginx:**
+
   ```bash
   sudo apt install nginx
   ```
@@ -137,6 +140,7 @@ docker-compose -f docker-compose.production.yml logs -f
 ## 📞 Support
 
 Nếu gặp vấn đề, kiểm tra:
+
 1. Jenkins console logs
 2. Docker container logs
 3. Nginx error logs

@@ -5,11 +5,13 @@ services:
     image: ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_TAG:-latest}
     container_name: vucar-app-production
     ports:
-      - "3000:3000"
+      - "3000:3000"  # VuCar app on port 3000
     environment:
       - NODE_ENV=production
       - PORT=3000
-      # Thêm các biến môi trường khác nếu cần
+      - DOMAIN=vucar.syledevops.live
+      - NEXTAUTH_URL=https://vucar.syledevops.live
+      # Add other environment variables as needed
       # - DATABASE_URL=${DATABASE_URL}
       # - API_KEY=${API_KEY}
     restart: unless-stopped

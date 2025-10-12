@@ -2,20 +2,20 @@ pipeline {
     agent any
     
     environment {
-        // DOCKER CONFIGURATION
+        // 🐳 DOCKER CONFIGURATION
         DOCKER_REGISTRY = 'docker.io'
         DOCKER_IMAGE_NAME = 'syle712/vucar-app'
         DOCKER_TAG = "${env.BUILD_NUMBER}"
         DOCKER_CREDENTIALS_ID = 'docker-registry-credentials'
         
-        // APPLICATION CONFIGURATION
+        // 📱 APPLICATION CONFIGURATION
         NODE_VERSION = '18'
         APP_NAME = 'vucar-app'
         PORT = '3000'
         
-        // DEPLOYMENT CONFIGURATION
-        PRODUCTION_SERVER = 'vucar.syledevops.live'  
-        PRODUCTION_USER = 'ec2-user'                   
+        // 🚀 DEPLOYMENT CONFIGURATION
+        PRODUCTION_SERVER = 'syledevops.live'  // ✅ Your Cloudflare domain
+        PRODUCTION_USER = 'ubuntu'             // EC2 default user (change to 'ec2-user' for Amazon Linux)
         SSH_CREDENTIALS_ID = 'ssh-deployment-key'
         
         // 🌿 BRANCH STRATEGY (simplified - only production)
@@ -270,7 +270,7 @@ pipeline {
                             *Commit:* `${env.GIT_COMMIT?.take(7)}`
                             ${env.DEPLOY_TARGET != 'none' ? "*URL:* https://" + env.PRODUCTION_SERVER : ''}
                             """.stripIndent(),
-                            // teamDomain: 'your-slack-workspace',  // Uncomment if using Slack
+                            teamDomain: 'your-workspace',
                             token: env.SLACK_CREDENTIALS_ID
                         )
                     } catch (Exception e) {
@@ -297,7 +297,7 @@ pipeline {
                         *Stage:* `${env.STAGE_NAME}`
                         *Check:* ${env.BUILD_URL}console
                         """.stripIndent(),
-                        // teamDomain: 'your-slack-workspace',  // Uncomment if using Slack
+                        teamDomain: 'your-workspace',
                         token: env.SLACK_CREDENTIALS_ID
                     )
                 } catch (Exception e) {

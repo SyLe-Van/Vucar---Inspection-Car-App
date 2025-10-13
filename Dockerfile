@@ -14,13 +14,15 @@ WORKDIR /app
 # Install deps only when package.json or lockfile change
 FROM base AS deps
 COPY package.json package-lock.json* ./
-# Use npm ci to provide reproducible installs. Install prod+optional only in builder
-RUN npm ci --only=production && npm cache clean --force
+# Skip prepare script (husky) and install production dependencies only
+RUN npm ci --omit=dev --ignore-scripts && npm cache clean --force
 
 # Builder: copy source and build
 FROM base AS builder
 WORKDIR /app
-COPY --from=deps /app/node_modules ./node_modules
+# Install ALL dependencies (including dev dependencies for build)
+COPY package.json package-lock.json* ./
+RUN npm ci --ignore-scripts && npm cache clean --force
 COPY . .
 
 # Accept build arguments from system environment

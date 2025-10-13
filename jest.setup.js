@@ -3,16 +3,16 @@
 
 // Used for __tests__/testing-library.js
 // Learn more: https://github.com/testing-library/jest-dom
-import '@testing-library/jest-dom'
+import "@testing-library/jest-dom";
 
 // Mock Next.js router
-jest.mock('next/router', () => ({
+jest.mock("next/router", () => ({
   useRouter() {
     return {
-      route: '/',
-      pathname: '/',
+      route: "/",
+      pathname: "/",
       query: {},
-      asPath: '/',
+      asPath: "/",
       push: jest.fn(),
       pop: jest.fn(),
       reload: jest.fn(),
@@ -24,42 +24,38 @@ jest.mock('next/router', () => ({
         off: jest.fn(),
         emit: jest.fn(),
       },
-    }
+    };
   },
-}))
+}));
 
 // Mock Next.js image component
-jest.mock('next/image', () => ({
+jest.mock("next/image", () => ({
   __esModule: true,
-  default: (props) => {
-    return <img {...props} />
+  default: props => {
+    return <img {...props} />;
   },
-}))
+}));
 
 // Mock environment variables
-process.env.MONGODB_URL = 'mongodb://localhost:27017/vucar_test'
-process.env.NEXTAUTH_SECRET = 'test-secret'
-process.env.NEXTAUTH_URL = 'http://localhost:3000'
-process.env.JWT_SECRET = 'test-jwt-secret'
-process.env.ENCRYPTION_KEY = 'test-encryption-key'
-process.env.NODE_ENV = 'test'
+process.env.MONGODB_URL = "mongodb://localhost:27017/vucar_test";
+process.env.NODE_ENV = "test";
 
 // Global test utilities
 global.ResizeObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   unobserve: jest.fn(),
   disconnect: jest.fn(),
-}))
+}));
 
 // Mock IntersectionObserver
 global.IntersectionObserver = jest.fn().mockImplementation(() => ({
   observe: jest.fn(),
   unobserve: jest.fn(),
   disconnect: jest.fn(),
-}))
+}));
 
 // Mock matchMedia
-Object.defineProperty(window, 'matchMedia', {
+Object.defineProperty(window, "matchMedia", {
   writable: true,
   value: jest.fn().mockImplementation(query => ({
     matches: false,
@@ -71,4 +67,4 @@ Object.defineProperty(window, 'matchMedia', {
     removeEventListener: jest.fn(),
     dispatchEvent: jest.fn(),
   })),
-})
+});

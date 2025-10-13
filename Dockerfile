@@ -27,18 +27,10 @@ COPY . .
 
 # Accept build arguments from system environment
 ARG MONGODB_URL=mongodb://localhost:27017/vucar-build
-ARG NEXTAUTH_URL=http://localhost:3000
-ARG NEXTAUTH_SECRET=build-dummy-secret-32-chars-long-abc123def456
-ARG JWT_SECRET=build-dummy-jwt-secret
-ARG ENCRYPTION_KEY=build-dummy-encryption-key
 ARG NODE_ENV=production
 
 # Set environment variables for build process
 ENV MONGODB_URL=$MONGODB_URL
-ENV NEXTAUTH_URL=$NEXTAUTH_URL
-ENV NEXTAUTH_SECRET=$NEXTAUTH_SECRET
-ENV JWT_SECRET=$JWT_SECRET
-ENV ENCRYPTION_KEY=$ENCRYPTION_KEY
 ENV NODE_ENV=$NODE_ENV
 
 # Ensure Next is configured to output standalone server (next.config.js: output: 'standalone')

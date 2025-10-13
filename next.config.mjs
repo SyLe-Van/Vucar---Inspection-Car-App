@@ -26,7 +26,6 @@ const nextConfig = {
   // Environment variables
   env: {
     MONGODB_URL: process.env.MONGODB_URL,
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL,
   },
 
   // Image optimization

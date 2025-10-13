@@ -170,16 +170,13 @@ pipeline {
                 script {
                     // Use Jenkins secrets for production environment
                     withCredentials([
-                        string(credentialsId: 'mongodb-uri-production', variable: 'MONGODB_URI'),
-                        string(credentialsId: 'jwt-secret-production', variable: 'JWT_SECRET'),
-                        string(credentialsId: 'next-public-app-url-production', variable: 'NEXT_PUBLIC_APP_URL')
+                        string(credentialsId: 'mongodb-uri-production', variable: 'MONGODB_URL')
                     ]) {
                         // Create production environment file from secrets
                         sh '''
                             echo "NODE_ENV=production" > .env.production
-                            echo "MONGODB_URI=${MONGODB_URI}" >> .env.production
-                            echo "JWT_SECRET=${JWT_SECRET}" >> .env.production
-                            echo "NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}" >> .env.production
+                            echo "MONGODB_URL=${MONGODB_URL}" >> .env.production
+                            echo "PORT=3000" >> .env.production
                             echo "DEBUG=false" >> .env.production
                             echo "LOG_LEVEL=warn" >> .env.production
                         '''

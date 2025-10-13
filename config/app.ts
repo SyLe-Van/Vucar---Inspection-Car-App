@@ -8,10 +8,6 @@ import { EnvironmentConfig } from "@/types";
 // Validate required environment variables
 const requiredEnvVars = [
   "MONGODB_URL",
-  "NEXTAUTH_SECRET",
-  "NEXTAUTH_URL",
-  "JWT_SECRET",
-  "ENCRYPTION_KEY",
 ] as const;
 
 function validateEnvironment(): EnvironmentConfig {
@@ -32,10 +28,6 @@ function validateEnvironment(): EnvironmentConfig {
   return {
     NODE_ENV: (process.env.NODE_ENV as EnvironmentConfig["NODE_ENV"]) || "development",
     MONGODB_URL: process.env.MONGODB_URL!,
-    NEXTAUTH_SECRET: process.env.NEXTAUTH_SECRET!,
-    NEXTAUTH_URL: process.env.NEXTAUTH_URL!,
-    JWT_SECRET: process.env.JWT_SECRET!,
-    ENCRYPTION_KEY: process.env.ENCRYPTION_KEY!,
     PORT: parseInt(process.env.PORT || "3000", 10),
   };
 }
@@ -58,25 +50,12 @@ export const appConfig = {
     },
   },
 
-  // Authentication configuration
-  auth: {
-    secret: process.env.NEXTAUTH_SECRET!,
-    url: process.env.NEXTAUTH_URL!,
-    jwt: {
-      secret: process.env.JWT_SECRET!,
-      expiresIn: "7d",
-    },
-    session: {
-      maxAge: 7 * 24 * 60 * 60, // 7 days
-    },
-  },
-
   // Application metadata
   app: {
     name: "VuCar",
     version: "1.0.0",
     description: "Professional Car Inspection Management System",
-    url: process.env.NEXTAUTH_URL || "http://localhost:3000",
+    url: process.env.APP_URL || "http://localhost:3000",
     port: parseInt(process.env.PORT || "3000", 10),
   },
 
@@ -127,7 +106,6 @@ export const appConfig = {
 
   // Security configuration
   security: {
-    encryptionKey: process.env.ENCRYPTION_KEY!,
     bcryptRounds: 12,
     corsOrigins: process.env.CORS_ORIGINS?.split(",") || ["http://localhost:3000"],
   },
@@ -155,4 +133,4 @@ export const isProduction = appConfig.env.NODE_ENV === "production";
 export const isTest = appConfig.env.NODE_ENV === "test";
 
 // Export individual configurations for convenience
-export const { env, database, auth, app, upload, pagination } = appConfig;
+export const { env, database, app, upload, pagination } = appConfig;

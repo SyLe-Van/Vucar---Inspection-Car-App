@@ -181,10 +181,6 @@ export interface DatabaseConfig {
 export interface EnvironmentConfig {
   NODE_ENV: "development" | "production" | "test";
   MONGODB_URL: string;
-  NEXTAUTH_SECRET: string;
-  NEXTAUTH_URL: string;
-  JWT_SECRET: string;
-  ENCRYPTION_KEY: string;
   PORT: number;
 }
 

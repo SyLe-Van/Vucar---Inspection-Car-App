@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Radio, Select, Space } from "antd";
+import { FormControl, InputLabel, MenuItem, Select, Box } from "@mui/material";
 
 const SelectHandler = ({ onChange }) => {
   const [size, setSize] = useState("middle");
@@ -15,25 +15,18 @@ const SelectHandler = ({ onChange }) => {
     setSize(e.target.value);
   };
   return (
-    <>
-      <Space
-        direction="vertical"
-        style={{
-          width: "100%",
-        }}
-      >
-        <Select
-          size={size}
-          defaultValue="Status"
-          onChange={handleChange}
-          style={{
-            width: 250,
-            height: 56,
-          }}
-          options={options}
-        />
-      </Space>
-    </>
+    <Box sx={{ width: "100%" }}>
+      <FormControl sx={{ minWidth: 250, height: 56 }}>
+        <InputLabel>Status</InputLabel>
+        <Select value="" onChange={handleChange} label="Status">
+          {options.map((option) => (
+            <MenuItem key={option.value} value={option.value}>
+              {option.label}
+            </MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+    </Box>
   );
 };
 export default SelectHandler;

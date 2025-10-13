@@ -13,6 +13,10 @@ pipeline {
         APP_NAME = 'vucar-app'
         PORT = '3000'
         
+        // ⚡ MEMORY OPTIMIZATION
+        NODE_OPTIONS = '--max-old-space-size=512'
+        DOCKER_BUILDKIT = '1'
+        
         // 🌿 BRANCH STRATEGY
         MAIN_BRANCH = 'main'
         
@@ -60,8 +64,9 @@ pipeline {
             steps {
                 echo "📦 Installing Node.js dependencies"
                 sh '''
-                    npm ci --prefer-offline --no-audit
+                    npm ci --prefer-offline --no-audit --progress=false --silent
                     npm list --depth=0
+                    echo "📊 Dependencies installed: $(ls node_modules | wc -l) packages"
                 '''
             }
         }
@@ -227,10 +232,25 @@ pipeline {
     post {
         always {
             script {
-                // Clean up Docker images to save space
+                // Comprehensive cleanup to save memory & space
                 sh '''
+                    echo "🧹 Cleaning up to free memory..."
+                    
+                    # Clean npm cache
+                    npm cache clean --force 2>/dev/null || true
+                    
+                    # Clean node_modules cache
+                    rm -rf node_modules/.cache 2>/dev/null || true
+                    
+                    # Clean Docker aggressively
                     docker image prune -f
+                    docker builder prune -f 2>/dev/null || true
+                    docker system prune -f
+                    
+                    # Show final status
+                    echo "📊 Final disk usage:"
                     docker system df
+                    du -sh node_modules 2>/dev/null || echo "No node_modules"
                 '''
             }
         }

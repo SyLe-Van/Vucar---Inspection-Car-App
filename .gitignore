@@ -18,7 +18,7 @@
 .env.production.local
 .env.production
 .env.staging
-
+.logs_pipeline.txt
 # testing
 /coverage
 

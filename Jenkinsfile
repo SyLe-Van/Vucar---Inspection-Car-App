@@ -2,24 +2,19 @@ pipeline {
     agent any
     
     environment {
-        // DOCKER CONFIGURATION
+        // 🐳 DOCKER CONFIGURATION
         DOCKER_REGISTRY = 'docker.io'
         DOCKER_IMAGE_NAME = 'syle712/vucar-app'
         DOCKER_TAG = "${env.BUILD_NUMBER}"
         DOCKER_CREDENTIALS_ID = 'docker-registry-credentials'
         
-        // APPLICATION CONFIGURATION
+        // 📱 APPLICATION CONFIGURATION
         NODE_VERSION = '18'
         APP_NAME = 'vucar-app'
         PORT = '3000'
         
-        // DEPLOYMENT CONFIGURATION
-        PRODUCTION_SERVER = 'vucar.syledevops.live'  
-        PRODUCTION_USER = 'ec2-user'                   
-        SSH_CREDENTIALS_ID = 'ssh-deployment-key'
-        
-        // 🌿 BRANCH STRATEGY (simplified - only production)
-        PRODUCTION_BRANCH = 'main'
+        // 🌿 BRANCH STRATEGY
+        MAIN_BRANCH = 'main'
         
         // 📢 NOTIFICATION (OPTIONAL)
         SLACK_CHANNEL = '#deployments'
@@ -40,13 +35,9 @@ pipeline {
         stage('🔍 Initialize') {
             steps {
                 script {
-                    // Determine deployment target based on branch
-                    env.IS_PRODUCTION = env.BRANCH_NAME == env.PRODUCTION_BRANCH ? 'true' : 'false'
-                    env.DEPLOY_TARGET = env.IS_PRODUCTION == 'true' ? 'production' : 'none'
-                    
                     echo "🌿 Branch: ${env.BRANCH_NAME}"
-                    echo "🎯 Deploy target: ${env.DEPLOY_TARGET}"
                     echo "🐳 Docker image: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
+                    echo "🎯 Mode: CI/CD Testing (No Deployment)"
                 }
             }
         }
@@ -193,48 +184,34 @@ pipeline {
             }
         }
         
-        stage('🚀 Deploy to Production') {
-            when {
-                branch env.PRODUCTION_BRANCH
-            }
+        stage('✅ CI/CD Complete') {
             steps {
                 script {
-                    // Manual approval for production
-                    input message: '🚀 Deploy to Production?', 
-                          ok: 'Deploy',
-                          submitter: 'admin',
-                          parameters: [choice(choices: ['Deploy', 'Cancel'], description: 'Confirm deployment', name: 'DEPLOY_CHOICE')]
+                    echo "🎉 CI/CD Pipeline completed successfully!"
+                    echo "📦 Docker image built and pushed: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
+                    echo "🚀 Ready for deployment when needed!"
                     
-                    echo "🚀 Deploying to production environment"
-                    deployToEnvironment('production', env.PRODUCTION_SERVER)
-                }
-            }
-        }
-        
-        stage('🔍 Health Check') {
-            when {
-                branch env.PRODUCTION_BRANCH
-            }
-            steps {
-                script {
-                    echo "🔍 Performing health check"
-                    sh '''
-                        sleep 30  # Wait for container to start
-                        
-                        # Health check with retry
-                        for i in {1..5}; do
-                            if curl -f -s "https://${PRODUCTION_SERVER}/api/health"; then
-                                echo "✅ Health check passed"
-                                exit 0
-                            else
-                                echo "⏳ Health check attempt $i failed, retrying in 10s..."
-                                sleep 10
-                            fi
-                        done
-                        
-                        echo "❌ Health check failed after 5 attempts"
-                        exit 1
-                    '''
+                    // Display summary
+                    def summary = """
+                    ================================
+                    🎯 CI/CD Pipeline Summary
+                    ================================
+                    ✅ Source Code: Checked out from ${env.BRANCH_NAME}
+                    ✅ Dependencies: Installed successfully
+                    ✅ Code Quality: Linting passed
+                    ✅ Security: Audit completed
+                    ✅ Application: Built successfully
+                    ✅ Docker Image: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}
+                    ✅ Registry: Pushed to ${env.DOCKER_REGISTRY}
+                    
+                    🔄 Next Steps:
+                    - Image ready for deployment
+                    - Use Docker image for testing
+                    - Deploy to staging/production when ready
+                    ================================
+                    """.stripIndent()
+                    
+                    echo summary
                 }
             }
         }
@@ -253,36 +230,33 @@ pipeline {
         
         success {
             script {
-                if (env.DEPLOY_TARGET != 'none') {
-                    echo "🎉 Pipeline completed successfully!"
-                    
-                    // Optional: Send Slack notification
-                    try {
-                        slackSend(
-                            channel: env.SLACK_CHANNEL,
-                            color: 'good',
-                            message: """
-                            ✅ *VuCar App Deployment Successful*
-                            
-                            *Branch:* `${env.BRANCH_NAME}`
-                            *Environment:* `${env.DEPLOY_TARGET}`
-                            *Build:* `#${env.BUILD_NUMBER}`
-                            *Commit:* `${env.GIT_COMMIT?.take(7)}`
-                            ${env.DEPLOY_TARGET != 'none' ? "*URL:* https://" + env.PRODUCTION_SERVER : ''}
-                            """.stripIndent(),
-                            // teamDomain: 'your-slack-workspace',  // Uncomment if using Slack
-                            token: env.SLACK_CREDENTIALS_ID
-                        )
-                    } catch (Exception e) {
-                        echo "Slack notification failed: ${e.message}"
-                    }
+                echo "🎉 CI/CD Pipeline completed successfully!"
+                
+                // Optional: Send Slack notification
+                try {
+                    slackSend(
+                        channel: env.SLACK_CHANNEL,
+                        color: 'good',
+                        message: """
+                        ✅ *VuCar CI/CD Pipeline Successful*
+                        
+                        *Branch:* `${env.BRANCH_NAME}`
+                        *Build:* `#${env.BUILD_NUMBER}`
+                        *Docker Image:* `${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}`
+                        *Status:* Ready for deployment
+                        """.stripIndent(),
+                        // teamDomain: 'your-slack-workspace',  // Uncomment if using Slack
+                        token: env.SLACK_CREDENTIALS_ID
+                    )
+                } catch (Exception e) {
+                    echo "Slack notification failed: ${e.message}"
                 }
             }
         }
         
         failure {
             script {
-                echo "❌ Pipeline failed!"
+                echo "❌ CI/CD Pipeline failed!"
                 
                 // Optional: Send Slack notification
                 try {
@@ -290,7 +264,7 @@ pipeline {
                         channel: env.SLACK_CHANNEL,
                         color: 'danger',
                         message: """
-                        ❌ *VuCar App Deployment Failed*
+                        ❌ *VuCar CI/CD Pipeline Failed*
                         
                         *Branch:* `${env.BRANCH_NAME}`
                         *Build:* `#${env.BUILD_NUMBER}`
@@ -311,48 +285,4 @@ pipeline {
             cleanWs()
         }
     }
-}
-
-// 🚀 Deployment function
-def deployToEnvironment(String environment, String server) {
-    echo "🚀 Deploying ${env.APP_NAME} to ${environment}"
-    
-    sshagent([env.SSH_CREDENTIALS_ID]) {
-        sh """
-            # Create deployment directory
-            ssh -o StrictHostKeyChecking=no ${env.PRODUCTION_USER}@${server} '
-                sudo mkdir -p /opt/vucar-app
-                sudo chown \$USER:\$USER /opt/vucar-app
-            '
-            
-            # Copy docker-compose file
-            scp -o StrictHostKeyChecking=no docker-compose.production.yml ${env.PRODUCTION_USER}@${server}:/opt/vucar-app/docker-compose.yml
-            
-            # Deploy application
-            ssh -o StrictHostKeyChecking=no ${env.PRODUCTION_USER}@${server} '
-                cd /opt/vucar-app
-                
-                # Set environment variables
-                export DOCKER_REGISTRY=${DOCKER_REGISTRY}
-                export DOCKER_IMAGE_NAME=${DOCKER_IMAGE_NAME}
-                export DOCKER_TAG=${DOCKER_TAG}
-                
-                # Pull latest image
-                docker pull ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_TAG}
-                
-                # Stop and remove old container
-                docker-compose down || true
-                
-                # Start new container
-                docker-compose up -d
-                
-                # Clean up old images
-                docker image prune -f
-                
-                echo "✅ Deployment completed"
-            '
-        """
-    }
-    
-    echo "✅ Successfully deployed to ${environment}"
 }

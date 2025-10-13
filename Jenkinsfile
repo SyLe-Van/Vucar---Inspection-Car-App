@@ -160,89 +160,39 @@ pipeline {
             }
         }
         
-        stage('🚀 Deploy to Production') {
+        stage('Deploy to Production') {
             when {
                 branch 'main'
+                expression { params.DEPLOY_TO_PRODUCTION == true }
             }
             steps {
+                echo "🚀 Deploying to Production..."
                 script {
-                    echo "⏸️  Requesting manual approval for production deployment..."
-                    
-                    // Manual approval gate
-                    input {
-                        message "🚀 Deploy to Production?"
-                        ok "✅ Deploy Now"
-                        parameters {
-                            choice(
-                                name: 'DEPLOY_STRATEGY',
-                                choices: ['rolling-update', 'blue-green'],
-                                description: 'Select deployment strategy'
-                            )
-                        }
-                    }
-                    
-                    echo "✅ Deployment approved! Starting production deployment..."
-                    echo "🎯 Strategy: ${DEPLOY_STRATEGY}"
-                    
-                    // Deploy using SSH to production server
-                    sshagent(['production-server-ssh']) {
+                    // Use Jenkins secrets for production environment
+                    withCredentials([
+                        string(credentialsId: 'mongodb-uri-production', variable: 'MONGODB_URI'),
+                        string(credentialsId: 'jwt-secret-production', variable: 'JWT_SECRET'),
+                        string(credentialsId: 'next-public-app-url-production', variable: 'NEXT_PUBLIC_APP_URL')
+                    ]) {
+                        // Create production environment file from secrets
                         sh '''
-                            # Production server details
-                            PROD_SERVER="ec2-user@3.0.19.202"
-                            DEPLOY_DIR="/opt/vucar-production"
-                            
-                            echo "📦 Deploying Docker image: ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
-                            
-                            # Copy deployment files to production server
-                            scp -o StrictHostKeyChecking=no \
-                                docker-compose.production.yml \
-                                nginx.production.conf \
-                                deploy-production.sh \
-                                .env.production.example \
-                                $PROD_SERVER:$DEPLOY_DIR/
-                            
-                            # Execute deployment on production server
-                            ssh -o StrictHostKeyChecking=no $PROD_SERVER "
-                                cd $DEPLOY_DIR
-                                
-                                # Make deployment script executable
-                                chmod +x deploy-production.sh
-                                
-                                # Update environment variables with new image tag
-                                sed -i 's/DOCKER_TAG=.*/DOCKER_TAG=${DOCKER_TAG}/' .env.production
-                                
-                                # Run deployment script
-                                ./deploy-production.sh
-                                
-                                # Verify deployment
-                                echo '✅ Deployment completed. Checking application status...'
-                                sleep 10
-                                curl -f http://localhost:3000/api/health || exit 1
-                                echo '🎉 Application is healthy and running!'
-                            "
+                            echo "NODE_ENV=production" > .env.production
+                            echo "MONGODB_URI=${MONGODB_URI}" >> .env.production
+                            echo "JWT_SECRET=${JWT_SECRET}" >> .env.production
+                            echo "NEXT_PUBLIC_APP_URL=${NEXT_PUBLIC_APP_URL}" >> .env.production
+                            echo "DEBUG=false" >> .env.production
+                            echo "LOG_LEVEL=warn" >> .env.production
                         '''
+                        
+                        // Deploy using docker-compose
+                        sh 'docker-compose -f deployment/docker/docker-compose.production.yml up -d --build'
+                        sh 'docker-compose -f deployment/docker/docker-compose.production.yml logs --tail=50'
+                        
+                        // Clean up environment file after deployment
+                        sh 'rm -f .env.production'
                     }
                 }
-            }
-            post {
-                success {
-                    echo "✅ Production deployment completed successfully!"
-                    // Optionally send notification
-                    slackSend(
-                        channel: '#deployments',
-                        color: 'good',
-                        message: "🚀 VuCar App deployed to production! Version: ${env.DOCKER_TAG}\nURL: https://vucar.syledevops.live"
-                    )
-                }
-                failure {
-                    echo "❌ Production deployment failed!"
-                    // Send failure notification
-                    slackSend(
-                        channel: '#deployments',
-                        color: 'danger',
-                        message: "❌ VuCar App production deployment failed! Build: ${env.BUILD_NUMBER}\nPlease check Jenkins logs."
-                    )
-                }
+                echo "✅ Production deployment completed"
             }
         }
         

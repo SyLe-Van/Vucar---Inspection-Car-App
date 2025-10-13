@@ -1,0 +1,502 @@
+Started
+Obtained Jenkinsfile from git https://github.com/SyLe-Van/Vucar---Inspection-Car-App
+[Pipeline] Start of Pipeline
+[Pipeline] node
+Still waiting to schedule task
+Waiting for next available executor
+Running on Jenkins in /var/lib/jenkins/workspace/vucar-pipeline
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Checkout SCM)
+[Pipeline] checkout
+Selected Git installation does not exist. Using Default
+The recommended git tool is: NONE
+using credential github-credentials
+ > git rev-parse --resolve-git-dir /var/lib/jenkins/workspace/vucar-pipeline/.git # timeout=10
+Fetching changes from the remote Git repository
+ > git config remote.origin.url https://github.com/SyLe-Van/Vucar---Inspection-Car-App # timeout=10
+Fetching upstream changes from https://github.com/SyLe-Van/Vucar---Inspection-Car-App
+ > git --version # timeout=10
+ > git --version # 'git version 2.50.1'
+using GIT_ASKPASS to set credentials GitHub Personal Access Token
+ > git fetch --tags --force --progress -- https://github.com/SyLe-Van/Vucar---Inspection-Car-App +refs/heads/*:refs/remotes/origin/* # timeout=10
+ > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+Checking out Revision 79750a002d9ddcfb29101efc1ffc2fe8bacb34e3 (refs/remotes/origin/main)
+ > git config core.sparsecheckout # timeout=10
+ > git checkout -f 79750a002d9ddcfb29101efc1ffc2fe8bacb34e3 # timeout=10
+Commit message: "🚀 Simplify Jenkinsfile for CI/CD testing"
+ > git rev-list --no-walk 79750a002d9ddcfb29101efc1ffc2fe8bacb34e3 # timeout=10
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] timeout
+Timeout set to expire in 30 min
+[Pipeline] {
+[Pipeline] timestamps
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (Declarative: Tool Install)
+[Pipeline] tool
+04:13:48  Unpacking https://nodejs.org/dist/v18.19.0/node-v18.19.0-linux-x64.tar.gz to /var/lib/jenkins/tools/jenkins.plugins.nodejs.tools.NodeJSInstallation/18 on Jenkins
+[Pipeline] envVarsForTool
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] stage
+[Pipeline] { (🔍 Initialize)
+[Pipeline] tool
+[Pipeline] envVarsForTool
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] script
+[Pipeline] {
+[Pipeline] echo
+04:13:58  🌿 Branch: null
+[Pipeline] echo
+04:13:58  🐳 Docker image: syle712/vucar-app:6
+[Pipeline] echo
+04:13:58  🎯 Mode: CI/CD Testing (No Deployment)
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (📦 Checkout)
+[Pipeline] tool
+[Pipeline] envVarsForTool
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] echo
+04:13:59  📥 Checking out source code
+[Pipeline] checkout
+04:13:59  Selected Git installation does not exist. Using Default
+04:13:59  The recommended git tool is: NONE
+04:13:59  using credential github-credentials
+04:13:59   > git rev-parse --resolve-git-dir /var/lib/jenkins/workspace/vucar-pipeline/.git # timeout=10
+04:13:59  Fetching changes from the remote Git repository
+04:13:59   > git config remote.origin.url https://github.com/SyLe-Van/Vucar---Inspection-Car-App # timeout=10
+04:13:59  Fetching upstream changes from https://github.com/SyLe-Van/Vucar---Inspection-Car-App
+04:13:59   > git --version # timeout=10
+04:13:59   > git --version # 'git version 2.50.1'
+04:13:59  using GIT_ASKPASS to set credentials GitHub Personal Access Token
+04:13:59   > git fetch --tags --force --progress -- https://github.com/SyLe-Van/Vucar---Inspection-Car-App +refs/heads/*:refs/remotes/origin/* # timeout=10
+04:13:59   > git rev-parse refs/remotes/origin/main^{commit} # timeout=10
+04:13:59  Checking out Revision 79750a002d9ddcfb29101efc1ffc2fe8bacb34e3 (refs/remotes/origin/main)
+04:13:59   > git config core.sparsecheckout # timeout=10
+04:13:59   > git checkout -f 79750a002d9ddcfb29101efc1ffc2fe8bacb34e3 # timeout=10
+04:13:59  Commit message: "🚀 Simplify Jenkinsfile for CI/CD testing"
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (🔍 Install Dependencies)
+[Pipeline] tool
+[Pipeline] envVarsForTool
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] echo
+04:14:00  📦 Installing Node.js dependencies
+[Pipeline] sh
+04:14:01  + npm ci --prefer-offline --no-audit
+04:14:22  npm WARN deprecated inflight@1.0.6: This module is not supported, and leaks memory. Do not use it. Check out lru-cache if you want a good and tested way to coalesce async requests by a key value, which is much more comprehensive and powerful.
+04:14:22  npm WARN deprecated are-we-there-yet@2.0.0: This package is no longer supported.
+04:14:22  npm WARN deprecated rimraf@3.0.2: Rimraf versions prior to v4 are no longer supported
+04:14:22  npm WARN deprecated npmlog@5.0.1: This package is no longer supported.
+04:14:23  npm WARN deprecated @humanwhocodes/object-schema@2.0.3: Use @eslint/object-schema instead
+04:14:25  npm WARN deprecated @humanwhocodes/config-array@0.11.14: Use @eslint/config-array instead
+04:14:25  npm WARN deprecated glob@7.2.3: Glob versions prior to v9 are no longer supported
+04:14:25  npm WARN deprecated gauge@3.0.2: This package is no longer supported.
+04:15:12  
+04:15:12  added 997 packages in 1m
+04:15:12  
+04:15:12  171 packages are looking for funding
+04:15:12    run `npm fund` for details
+04:15:12  + npm list --depth=0
+04:15:12  vucar@0.1.0 /var/lib/jenkins/workspace/vucar-pipeline
+04:15:12  ├── @emotion/react@11.13.0
+04:15:12  ├── @emotion/styled@11.13.0
+04:15:12  ├── @mui/icons-material@5.16.7
+04:15:12  ├── @mui/lab@5.0.0-alpha.173
+04:15:12  ├── @mui/material@5.16.7
+04:15:12  ├── @mui/x-date-pickers@7.17.0
+04:15:12  ├── @next-auth/mongodb-adapter@1.1.3
+04:15:12  ├── @nextui-org/radio@2.1.5
+04:15:12  ├── @nextui-org/react@2.4.8
+04:15:12  ├── @paypal/react-paypal-js@8.5.0
+04:15:12  ├── @redux-devtools/extension@3.3.0
+04:15:12  ├── @reduxjs/toolkit@2.2.7
+04:15:12  ├── @stripe/react-stripe-js@2.8.0
+04:15:12  ├── @stripe/stripe-js@4.3.0
+04:15:12  ├── @types/node@17.0.45
+04:15:12  ├── antd@5.20.6
+04:15:12  ├── axios@1.3.1
+04:15:12  ├── bcrypt@5.1.1
+04:15:12  ├── bcryptjs@2.4.3
+04:15:12  ├── body-parser@1.20.2
+04:15:12  ├── dayjs@1.11.12
+04:15:12  ├── eslint-config-next@14.2.5
+04:15:12  ├── eslint@8.57.0
+04:15:12  ├── express-fileupload@1.5.1
+04:15:12  ├── formik@2.4.6
+04:15:12  ├── framer-motion@11.5.4
+04:15:12  ├── fs@0.0.1-security
+04:15:12  ├── googleapis@140.0.1
+04:15:12  ├── jsonwebtoken@9.0.2
+04:15:12  ├── mongodb@5.9.2
+04:15:12  ├── mongoose@8.5.2
+04:15:12  ├── next-auth@4.24.7
+04:15:12  ├── next-cloudinary@6.10.0
+04:15:12  ├── next-connect@1.0.0
+04:15:12  ├── next-redux-wrapper@8.1.0
+04:15:12  ├── next@14.2.5
+04:15:12  ├── nodemailer@6.9.14
+04:15:12  ├── react-dom@18.3.1
+04:15:12  ├── react-icons@5.2.1
+04:15:12  ├── react-redux@9.1.2
+04:15:12  ├── react-responsive@10.0.0
+04:15:12  ├── react-share@5.1.0
+04:15:12  ├── react-spinners@0.14.1
+04:15:12  ├── react-toastify@10.0.5
+04:15:12  ├── react@18.3.1
+04:15:12  ├── redux-persist@6.0.0
+04:15:12  ├── redux-thunk@3.1.0
+04:15:12  ├── redux@5.0.1
+04:15:12  ├── sass@1.77.8
+04:15:12  ├── slugify@1.6.6
+04:15:12  ├── stripe@16.8.0
+04:15:12  ├── swiper@11.1.9
+04:15:12  ├── tailwindcss@3.4.12
+04:15:12  ├── yup-phone@1.3.2
+04:15:12  └── yup@1.4.0
+04:15:12  
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (🔍 Code Quality)
+[Pipeline] parallel
+[Pipeline] { (Branch: Lint)
+[Pipeline] { (Branch: Security Audit)
+[Pipeline] stage
+[Pipeline] { (Lint)
+[Pipeline] stage
+[Pipeline] { (Security Audit)
+[Pipeline] tool
+[Pipeline] tool
+[Pipeline] envVarsForTool
+[Pipeline] envVarsForTool
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] echo
+04:15:13  🔍 Running ESLint
+[Pipeline] sh
+[Pipeline] echo
+04:15:13  🔒 Running security audit
+[Pipeline] sh
+04:15:13  + npm run lint --silent
+04:15:13  + npm audit --audit-level moderate
+04:15:23  Attention: Next.js now collects completely anonymous telemetry regarding usage.
+04:15:23  This information is used to shape Next.js' roadmap and prioritize features.
+04:15:23  You can learn more, including how to opt-out if you'd not like to participate in this anonymous program, by visiting the following URL:
+04:15:23  https://nextjs.org/telemetry
+04:15:23  
+04:15:23  ✔ No ESLint warnings or errors
+Post stage
+[Pipeline] echo
+04:15:23  📊 Lint check completed
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+04:15:25  # npm audit report
+04:15:25  
+04:15:25  @babel/runtime  <7.26.10
+04:15:25  Severity: moderate
+04:15:25  Babel has inefficient RegExp complexity in generated code with .replace when transpiling named capturing groups - https://github.com/advisories/GHSA-968p-4wvh-cqc8
+04:15:25  fix available via `npm audit fix`
+04:15:25  node_modules/@babel/runtime
+04:15:25  
+04:15:25  axios  1.0.0 - 1.11.0
+04:15:25  Severity: high
+04:15:25  Axios Cross-Site Request Forgery Vulnerability - https://github.com/advisories/GHSA-wf5p-g6vw-rhxx
+04:15:25  axios Requests Vulnerable To Possible SSRF and Credential Leakage via Absolute URL - https://github.com/advisories/GHSA-jr5f-v2jv-69x6
+04:15:25  Axios is vulnerable to DoS attack through lack of data size check - https://github.com/advisories/GHSA-4hjh-wcwx-xvwj
+04:15:25  fix available via `npm audit fix`
+04:15:25  node_modules/axios
+04:15:25  
+04:15:25  body-parser  <1.20.3
+04:15:25  Severity: high
+04:15:25  body-parser vulnerable to denial of service when url encoding is enabled - https://github.com/advisories/GHSA-qwcr-r2fm-qrc7
+04:15:25  fix available via `npm audit fix`
+04:15:25  node_modules/body-parser
+04:15:25  
+04:15:25  brace-expansion  1.0.0 - 1.1.11 || 2.0.0 - 2.0.1
+04:15:25  brace-expansion Regular Expression Denial of Service vulnerability - https://github.com/advisories/GHSA-v6h2-p8h4-qcjw
+04:15:25  brace-expansion Regular Expression Denial of Service vulnerability - https://github.com/advisories/GHSA-v6h2-p8h4-qcjw
+04:15:25  fix available via `npm audit fix`
+04:15:25  node_modules/@typescript-eslint/typescript-estree/node_modules/brace-expansion
+04:15:25  node_modules/brace-expansion
+04:15:25  node_modules/glob/node_modules/brace-expansion
+04:15:25  
+04:15:25  cookie  <0.7.0
+04:15:25  cookie accepts cookie name, path, and domain with out of bounds characters - https://github.com/advisories/GHSA-pxg6-pf52-xh8x
+04:15:25  fix available via `npm audit fix`
+04:15:25  node_modules/cookie
+04:15:25    next-auth  <=0.0.0-semantically-released || 1.1.0 - 1.5.0 || >=2.0.0-beta.0
+04:15:25    Depends on vulnerable versions of cookie
+04:15:25    Depends on vulnerable versions of nodemailer
+04:15:25    node_modules/next-auth
+04:15:25  
+04:15:25  cross-spawn  <6.0.6 || >=7.0.0 <7.0.5
+04:15:25  Severity: high
+04:15:25  Regular Expression Denial of Service (ReDoS) in cross-spawn - https://github.com/advisories/GHSA-3xgq-45jj-v275
+04:15:25  Regular Expression Denial of Service (ReDoS) in cross-spawn - https://github.com/advisories/GHSA-3xgq-45jj-v275
+04:15:25  fix available via `npm audit fix`
+04:15:25  node_modules/cross-spawn
+04:15:25  node_modules/npm-run-all/node_modules/cross-spawn
+04:15:25  
+04:15:25  form-data  4.0.0 - 4.0.3
+04:15:25  Severity: critical
+04:15:25  form-data uses unsafe random function in form-data for choosing boundary - https://github.com/advisories/GHSA-fjxv-7rqg-78g4
+04:15:25  fix available via `npm audit fix`
+04:15:25  node_modules/form-data
+04:15:25  
+04:15:25  micromatch  <4.0.8
+04:15:25  Severity: moderate
+04:15:25  Regular Expression Denial of Service (ReDoS) in micromatch - https://github.com/advisories/GHSA-952p-6rrq-rcjv
+04:15:25  fix available via `npm audit fix`
+04:15:25  node_modules/micromatch
+04:15:25  
+04:15:25  mongoose  8.0.0-rc0 - 8.9.4
+04:15:25  Severity: critical
+04:15:25  Mongoose search injection vulnerability - https://github.com/advisories/GHSA-m7xq-9374-9rvx
+04:15:25  Mongoose search injection vulnerability - https://github.com/advisories/GHSA-vg7j-7cwx-8wgw
+04:15:25  fix available via `npm audit fix`
+04:15:25  node_modules/mongoose
+04:15:25  
+04:15:25  nanoid  <3.3.8
+04:15:25  Severity: moderate
+04:15:25  Predictable results in nanoid generation when given non-integer values - https://github.com/advisories/GHSA-mwcw-c2x4-8c55
+04:15:25  fix available via `npm audit fix`
+04:15:25  node_modules/nanoid
+04:15:25  
+04:15:25  next  0.9.9 - 14.2.31
+04:15:25  Severity: critical
+04:15:25  Next.js Cache Poisoning - https://github.com/advisories/GHSA-gp8f-8m3g-qvj9
+04:15:25  Denial of Service condition in Next.js image optimization - https://github.com/advisories/GHSA-g77x-44xx-532m
+04:15:25  Next.js Allows a Denial of Service (DoS) with Server Actions - https://github.com/advisories/GHSA-7m27-7ghc-44w9
+04:15:25  Information exposure in Next.js dev server due to lack of origin verification - https://github.com/advisories/GHSA-3h52-269p-cp9r
+04:15:25  Next.js Affected by Cache Key Confusion for Image Optimization API Routes - https://github.com/advisories/GHSA-g5qg-72qw-gw5v
+04:15:25  Authorization Bypass in Next.js Middleware - https://github.com/advisories/GHSA-f82v-jwr5-mffw
+04:15:25  Next.js authorization bypass vulnerability - https://github.com/advisories/GHSA-7gfc-8cq8-jh5f
+04:15:25  Next.js Improper Middleware Redirect Handling Leads to SSRF - https://github.com/advisories/GHSA-4342-x723-ch2f
+04:15:25  Next.js Content Injection Vulnerability for Image Optimization - https://github.com/advisories/GHSA-xv57-4mr9-wg8v
+04:15:25  Next.js Race Condition to Cache Poisoning - https://github.com/advisories/GHSA-qpjv-v59x-3qc4
+04:15:25  fix available via `npm audit fix --force`
+04:15:25  Will install next@14.2.33, which is outside the stated dependency range
+04:15:25  node_modules/next
+04:15:25  
+04:15:25  nodemailer  <7.0.7
+04:15:25  Severity: moderate
+04:15:25  Nodemailer: Email to an unintended domain can occur due to Interpretation Conflict - https://github.com/advisories/GHSA-mm7p-fcc7-pg87
+04:15:25  fix available via `npm audit fix --force`
+04:15:25  Will install nodemailer@7.0.9, which is a breaking change
+04:15:25  node_modules/nodemailer
+04:15:25  
+04:15:25  13 vulnerabilities (2 low, 5 moderate, 3 high, 3 critical)
+04:15:25  
+04:15:25  To address issues that do not require attention, run:
+04:15:25    npm audit fix
+04:15:25  
+04:15:25  To address all issues (including breaking changes), run:
+04:15:25    npm audit fix --force
+04:15:25  + echo 'Security audit completed with warnings'
+04:15:25  Security audit completed with warnings
+04:15:25  + npm outdated
+04:15:28  Package                          Current           Wanted         Latest  Location                              Depended by
+04:15:28  @emotion/react                   11.13.0          11.14.0        11.14.0  node_modules/@emotion/react           vucar-pipeline
+04:15:28  @emotion/styled                  11.13.0          11.14.1        11.14.1  node_modules/@emotion/styled          vucar-pipeline
+04:15:28  @mui/icons-material               5.16.7           5.18.0          7.3.4  node_modules/@mui/icons-material      vucar-pipeline
+04:15:28  @mui/lab                 5.0.0-alpha.173  5.0.0-alpha.177  7.0.1-beta.18  node_modules/@mui/lab                 vucar-pipeline
+04:15:28  @mui/material                     5.16.7           5.18.0          7.3.4  node_modules/@mui/material            vucar-pipeline
+04:15:28  @mui/x-date-pickers               7.17.0           7.29.4         8.14.0  node_modules/@mui/x-date-pickers      vucar-pipeline
+04:15:28  @nextui-org/radio                  2.1.5            2.3.8          2.3.8  node_modules/@nextui-org/radio        vucar-pipeline
+04:15:28  @nextui-org/react                  2.4.8           2.6.11         2.6.11  node_modules/@nextui-org/react        vucar-pipeline
+04:15:28  @paypal/react-paypal-js            8.5.0            8.9.2          8.9.2  node_modules/@paypal/react-paypal-js  vucar-pipeline
+04:15:28  @reduxjs/toolkit                   2.2.7            2.9.0          2.9.0  node_modules/@reduxjs/toolkit         vucar-pipeline
+04:15:28  @stripe/react-stripe-js            2.8.0            2.9.0          5.2.0  node_modules/@stripe/react-stripe-js  vucar-pipeline
+04:15:28  @stripe/stripe-js                  4.3.0           4.10.0          8.0.0  node_modules/@stripe/stripe-js        vucar-pipeline
+04:15:28  @types/node                      17.0.45          17.0.45         24.7.2  node_modules/@types/node              vucar-pipeline
+04:15:28  antd                              5.20.6           5.27.4         5.27.4  node_modules/antd                     vucar-pipeline
+04:15:28  axios                              1.3.1           1.12.2         1.12.2  node_modules/axios                    vucar-pipeline
+04:15:28  bcrypt                             5.1.1            5.1.1          6.0.0  node_modules/bcrypt                   vucar-pipeline
+04:15:28  bcryptjs                           2.4.3            2.4.3          3.0.2  node_modules/bcryptjs                 vucar-pipeline
+04:15:28  body-parser                       1.20.2           1.20.3          2.2.0  node_modules/body-parser              vucar-pipeline
+04:15:28  dayjs                            1.11.12          1.11.18        1.11.18  node_modules/dayjs                    vucar-pipeline
+04:15:28  eslint                            8.57.0           8.57.1         9.37.0  node_modules/eslint                   vucar-pipeline
+04:15:28  eslint-config-next                14.2.5           14.2.5         15.5.4  node_modules/eslint-config-next       vucar-pipeline
+04:15:28  express-fileupload                 1.5.1            1.5.2          1.5.2  node_modules/express-fileupload       vucar-pipeline
+04:15:28  framer-motion                     11.5.4          11.18.2       12.23.24  node_modules/framer-motion            vucar-pipeline
+04:15:28  googleapis                       140.0.1          140.0.1        162.0.0  node_modules/googleapis               vucar-pipeline
+04:15:28  mongodb                            5.9.2            5.9.2         6.20.0  node_modules/mongodb                  vucar-pipeline
+04:15:28  mongoose                           8.5.2           8.19.1         8.19.1  node_modules/mongoose                 vucar-pipeline
+04:15:28  next                              14.2.5           14.2.5         15.5.4  node_modules/next                     vucar-pipeline
+04:15:28  next-auth                         4.24.7          4.24.11        4.24.11  node_modules/next-auth                vucar-pipeline
+04:15:28  next-cloudinary                   6.10.0           6.16.0         6.16.0  node_modules/next-cloudinary          vucar-pipeline
+04:15:28  nodemailer                        6.9.14           6.10.1          7.0.9  node_modules/nodemailer               vucar-pipeline
+04:15:28  react                             18.3.1           18.3.1         19.2.0  node_modules/react                    vucar-pipeline
+04:15:28  react-dom                         18.3.1           18.3.1         19.2.0  node_modules/react-dom                vucar-pipeline
+04:15:28  react-icons                        5.2.1            5.5.0          5.5.0  node_modules/react-icons              vucar-pipeline
+04:15:28  react-redux                        9.1.2            9.2.0          9.2.0  node_modules/react-redux              vucar-pipeline
+04:15:28  react-responsive                  10.0.0           10.0.1         10.0.1  node_modules/react-responsive         vucar-pipeline
+04:15:28  react-share                        5.1.0            5.2.2          5.2.2  node_modules/react-share              vucar-pipeline
+04:15:28  react-spinners                    0.14.1           0.14.1         0.17.0  node_modules/react-spinners           vucar-pipeline
+04:15:28  react-toastify                    10.0.5           10.0.6         11.0.5  node_modules/react-toastify           vucar-pipeline
+04:15:28  sass                              1.77.8           1.93.2         1.93.2  node_modules/sass                     vucar-pipeline
+04:15:28  stripe                            16.8.0          16.12.0         19.1.0  node_modules/stripe                   vucar-pipeline
+04:15:28  swiper                            11.1.9          11.2.10         12.0.2  node_modules/swiper                   vucar-pipeline
+04:15:28  tailwindcss                       3.4.12           3.4.18         4.1.14  node_modules/tailwindcss              vucar-pipeline
+04:15:28  yup                                1.4.0            1.7.1          1.7.1  node_modules/yup                      vucar-pipeline
+04:15:28  + echo 'Dependency check completed'
+04:15:28  Dependency check completed
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // parallel
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (🏗️ Build Application)
+[Pipeline] tool
+[Pipeline] envVarsForTool
+[Pipeline] withEnv
+[Pipeline] {
+[Pipeline] echo
+04:15:29  🏗️ Building Next.js application
+[Pipeline] sh
+04:15:29  + npm run build
+04:15:29  
+04:15:29  > vucar@0.1.0 build
+04:15:29  > next build
+04:15:29  
+04:15:31    ▲ Next.js 14.2.5
+04:15:31  
+04:15:31     Linting and checking validity of types ...
+04:15:33     Creating an optimized production build ...
+04:15:37  Browserslist: caniuse-lite is outdated. Please run:
+04:15:37    npx update-browserslist-db@latest
+04:15:37    Why you should do it regularly: https://github.com/browserslist/update-db#readme
+04:15:59  Browserslist: caniuse-lite is outdated. Please run:
+04:15:59    npx update-browserslist-db@latest
+04:15:59    Why you should do it regularly: https://github.com/browserslist/update-db#readme
+04:16:20   ✓ Compiled successfully
+04:16:20     Collecting page data ...
+04:16:20  Error: Please define the MONGODB_URL environment variable inside .env.local
+04:16:20      at 4730 (/var/lib/jenkins/workspace/vucar-pipeline/.next/server/pages/criteria.js:1:11405)
+04:16:20      at o (/var/lib/jenkins/workspace/vucar-pipeline/.next/server/webpack-runtime.js:1:127)
+04:16:20      at /var/lib/jenkins/workspace/vucar-pipeline/.next/server/pages/criteria.js:1:9348
+04:16:20      at o.a (/var/lib/jenkins/workspace/vucar-pipeline/.next/server/webpack-runtime.js:1:866)
+04:16:20      at 5430 (/var/lib/jenkins/workspace/vucar-pipeline/.next/server/pages/criteria.js:1:9227)
+04:16:20      at o (/var/lib/jenkins/workspace/vucar-pipeline/.next/server/webpack-runtime.js:1:127)
+04:16:20      at /var/lib/jenkins/workspace/vucar-pipeline/.next/server/pages/criteria.js:1:1904
+04:16:20      at o.a (/var/lib/jenkins/workspace/vucar-pipeline/.next/server/webpack-runtime.js:1:866)
+04:16:20      at 576 (/var/lib/jenkins/workspace/vucar-pipeline/.next/server/pages/criteria.js:1:1513)
+04:16:20      at o (/var/lib/jenkins/workspace/vucar-pipeline/.next/server/webpack-runtime.js:1:127)
+04:16:20  
+04:16:20  > Build error occurred
+04:16:20  Error: Failed to collect page data for /criteria
+04:16:20      at /var/lib/jenkins/workspace/vucar-pipeline/node_modules/next/dist/build/utils.js:1268:15
+04:16:20      at process.processTicksAndRejections (node:internal/process/task_queues:95:5) {
+04:16:20    type: 'Error'
+04:16:20  }
+Post stage
+[Pipeline] echo
+04:16:21  ❌ Application build failed
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (🐳 Build Docker Image)
+Stage "🐳 Build Docker Image" skipped due to earlier failure(s)
+[Pipeline] getContext
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (🔒 Security Scan)
+Stage "🔒 Security Scan" skipped due to earlier failure(s)
+[Pipeline] getContext
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (📤 Push Docker Image)
+Stage "📤 Push Docker Image" skipped due to earlier failure(s)
+[Pipeline] getContext
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (✅ CI/CD Complete)
+Stage "✅ CI/CD Complete" skipped due to earlier failure(s)
+[Pipeline] getContext
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] stage
+[Pipeline] { (Declarative: Post Actions)
+[Pipeline] script
+[Pipeline] {
+[Pipeline] sh
+04:16:22  + docker image prune -f
+04:16:22  Total reclaimed space: 0B
+04:16:22  + docker system df
+04:16:22  TYPE            TOTAL     ACTIVE    SIZE      RECLAIMABLE
+04:16:22  Images          0         0         0B        0B
+04:16:22  Containers      0         0         0B        0B
+04:16:22  Local Volumes   0         0         0B        0B
+04:16:22  Build Cache     0         0         0B        0B
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] script
+[Pipeline] {
+[Pipeline] echo
+04:16:22  ❌ CI/CD Pipeline failed!
+[Pipeline] slackSend
+04:16:22  Slack Send Pipeline step running, values are - baseUrl: <empty>, teamDomain: <empty>, channel: #deployments, color: danger, botUser: false, tokenCredentialId: <empty>, notifyCommitters: false, iconEmoji: <empty>, username: <empty>, timestamp: <empty>
+04:16:23  ERROR: Slack notification failed. See Jenkins logs for details.
+[Pipeline] }
+[Pipeline] // script
+[Pipeline] echo
+04:16:23  🧹 Cleaning up workspace
+[Pipeline] cleanWs
+04:16:23  [WS-CLEANUP] Deleting project workspace...
+04:16:23  [WS-CLEANUP] Deferred wipeout is used...
+04:16:23  [WS-CLEANUP] done
+[Pipeline] }
+[Pipeline] // stage
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // timestamps
+[Pipeline] }
+[Pipeline] // timeout
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // withEnv
+[Pipeline] }
+[Pipeline] // node
+[Pipeline] End of Pipeline
+ERROR: script returned exit code 1
+Finished: FAILURE

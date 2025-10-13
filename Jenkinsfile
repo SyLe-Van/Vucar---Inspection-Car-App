@@ -5,8 +5,10 @@ pipeline {
         // Docker Configuration
         DOCKER_REGISTRY = 'docker.io'
         DOCKER_IMAGE_NAME = 'syle712/vucar-app'
-        DOCKER_TAG = "${env.BUILD_NUMBER}"
         DOCKER_CREDENTIALS_ID = 'docker-registry-credentials'
+        
+        // Branch-specific Docker tagging
+        DOCKER_TAG = "${env.BRANCH_NAME == 'main' ? 'v1.0.' + env.BUILD_NUMBER : env.BRANCH_NAME + '-' + env.BUILD_NUMBER}"
         
         // Application Configuration
         NODE_VERSION = '18'
@@ -31,8 +33,19 @@ pipeline {
             steps {
                 script {
                     echo "🌿 Branch: ${env.BRANCH_NAME}"
-                    echo "🐳 Docker image: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
-                    echo "🎯 Mode: CI/CD Testing (No Deployment)"
+                    
+                    // Branch-specific configuration
+                    if (env.BRANCH_NAME == 'main') {
+                        echo "� PRODUCTION Pipeline"
+                        echo "📁 Environment: .env.production"
+                        echo "�🐳 Docker tag: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
+                        echo "🎯 Mode: Full CI/CD with Manual Approval + Deploy"
+                    } else {
+                        echo "🔧 DEVELOPMENT Pipeline"
+                        echo "📁 Environment: .env.local"
+                        echo "🐳 Docker tag: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
+                        echo "🎯 Mode: CI/CD Testing (No Deployment)"
+                    }
                 }
             }
         }
@@ -91,26 +104,14 @@ pipeline {
             steps {
                 echo "🏗️ Building Next.js application"
                 sh '''
-                    # Determine which env file to use based on branch
-                    if [ "$BRANCH_NAME" = "main" ]; then
-                        ENV_FILE=".env.production"
-                        echo "🚀 Production build - using .env.production"
-                    else
-                        ENV_FILE=".env.local"
-                        echo "🔧 Development build - using .env.local"
-                    fi
-                    
-                    # Check if the appropriate env file exists
-                    if [ -f "$ENV_FILE" ]; then
-                        echo "✅ Using $ENV_FILE from repository"
+                    # Check if .env.local exists in the repository
+                    if [ -f ".env.local" ]; then
+                        echo "✅ Using existing .env.local from repository"
                         echo "Environment variables loaded:"
-                        grep -E "^[A-Z]" "$ENV_FILE" | head -5 | sed 's/=.*/=***/'
-                        
-                        # Copy to .env.local for Next.js to read
-                        cp "$ENV_FILE" .env.local
+                        grep -E "^[A-Z]" .env.local | head -5 | sed 's/=.*/=***/'
                     else
-                        echo "❌ $ENV_FILE not found in repository"
-                        echo "Please ensure $ENV_FILE is committed to the repository"
+                        echo "❌ .env.local not found in repository"
+                        echo "Please ensure .env.local is committed to the repository"
                         exit 1
                     fi
                     
@@ -165,7 +166,23 @@ pipeline {
             }
             steps {
                 script {
-                    echo "🚀 Deploying to Production Environment"
+                    echo "⏸️  Requesting manual approval for production deployment..."
+                    
+                    // Manual approval gate
+                    input {
+                        message "🚀 Deploy to Production?"
+                        ok "✅ Deploy Now"
+                        parameters {
+                            choice(
+                                name: 'DEPLOY_STRATEGY',
+                                choices: ['rolling-update', 'blue-green'],
+                                description: 'Select deployment strategy'
+                            )
+                        }
+                    }
+                    
+                    echo "✅ Deployment approved! Starting production deployment..."
+                    echo "🎯 Strategy: ${DEPLOY_STRATEGY}"
                     
                     // Deploy using SSH to production server
                     sshagent(['production-server-ssh']) {
@@ -229,12 +246,39 @@ pipeline {
             }
         }
         
-        stage('✅ CI/CD Complete') {
+        stage('📊 Development Summary') {
+            when {
+                not { branch 'main' }
+            }
             steps {
                 script {
-                    echo "🎉 CI/CD Pipeline completed successfully!"
-                    echo "📦 Docker image: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
-                    echo "🚀 Ready for deployment!"
+                    echo "🔧 DEVELOPMENT BUILD COMPLETE"
+                    echo "┌─────────────────────────────────────┐"
+                    echo "│  ✅ Code Quality: PASSED            │"
+                    echo "│  ✅ Tests: PASSED                   │"
+                    echo "│  ✅ Build: SUCCESSFUL               │"
+                    echo "│  � Docker Image: BUILT             │"
+                    echo "│  📦 Image: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
+                    echo "│  � Deployment: SKIPPED (Dev Only)  │"
+                    echo "└─────────────────────────────────────┘"
+                    echo "💡 To deploy: Merge to main branch"
+                }
+            }
+        }
+        
+        stage('✅ CI/CD Complete') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    echo "🎉 PRODUCTION PIPELINE COMPLETED!"
+                    echo "┌─────────────────────────────────────┐"
+                    echo "│  ✅ All Stages: PASSED             │"
+                    echo "│  🚀 Deployment: SUCCESSFUL         │"
+                    echo "│  📦 Image: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
+                    echo "│  🌐 Live: https://vucar.syledevops.live"
+                    echo "└─────────────────────────────────────┘"
                 }
             }
         }
@@ -267,11 +311,28 @@ pipeline {
         }
         
         success {
-            echo "🎉 CI/CD Pipeline completed successfully!"
+            script {
+                if (env.BRANCH_NAME == 'main') {
+                    echo "🎉 PRODUCTION DEPLOYMENT SUCCESSFUL!"
+                    echo "🌐 Application is live at: https://vucar.syledevops.live"
+                } else {
+                    echo "🎉 DEVELOPMENT BUILD SUCCESSFUL!"
+                    echo "🐳 Docker image ready: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
+                    echo "💡 Ready for testing or merge to main"
+                }
+            }
         }
         
         failure {
-            echo "❌ CI/CD Pipeline failed!"
+            script {
+                if (env.BRANCH_NAME == 'main') {
+                    echo "❌ PRODUCTION PIPELINE FAILED!"
+                    echo "🚨 Production deployment unsuccessful"
+                } else {
+                    echo "❌ DEVELOPMENT PIPELINE FAILED!"
+                    echo "🔧 Fix issues before merging to main"
+                }
+            }
         }
         
         cleanup {

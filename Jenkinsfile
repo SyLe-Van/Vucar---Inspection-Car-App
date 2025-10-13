@@ -91,14 +91,26 @@ pipeline {
             steps {
                 echo "🏗️ Building Next.js application"
                 sh '''
-                    # Check if .env.local exists in the repository
-                    if [ -f ".env.local" ]; then
-                        echo "✅ Using existing .env.local from repository"
-                        echo "Environment variables loaded:"
-                        grep -E "^[A-Z]" .env.local | head -5 | sed 's/=.*/=***/'
+                    # Determine which env file to use based on branch
+                    if [ "$BRANCH_NAME" = "main" ]; then
+                        ENV_FILE=".env.production"
+                        echo "🚀 Production build - using .env.production"
                     else
-                        echo "❌ .env.local not found in repository"
-                        echo "Please ensure .env.local is committed to the repository"
+                        ENV_FILE=".env.local"
+                        echo "🔧 Development build - using .env.local"
+                    fi
+                    
+                    # Check if the appropriate env file exists
+                    if [ -f "$ENV_FILE" ]; then
+                        echo "✅ Using $ENV_FILE from repository"
+                        echo "Environment variables loaded:"
+                        grep -E "^[A-Z]" "$ENV_FILE" | head -5 | sed 's/=.*/=***/'
+                        
+                        # Copy to .env.local for Next.js to read
+                        cp "$ENV_FILE" .env.local
+                    else
+                        echo "❌ $ENV_FILE not found in repository"
+                        echo "Please ensure $ENV_FILE is committed to the repository"
                         exit 1
                     fi
                     

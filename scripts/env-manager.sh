@@ -73,11 +73,11 @@ setup_local() {
 setup_local_build() {
     print_info "Setting up local build testing environment..."
     
-    # Copy local build environment file
-    cp "$ENV_DIR/local/.env.build" "$PROJECT_ROOT/.env"
+    # Copy local environment file for build
+    cp "$ENV_DIR/local/.env.local" "$PROJECT_ROOT/.env"
     
     print_status "Local build testing environment ready!"
-    print_info "MongoDB: mongodb://localhost:27017/vucar_build"
+    print_info "MongoDB: Uses .env.local configuration"
     print_info "Run: npm run build && npm start"
 }
 
@@ -219,10 +219,9 @@ clean_env() {
     fi
     
     rm -f "$PROJECT_ROOT/.env"
-    rm -f "$PROJECT_ROOT/environments/production/.env.production"
+    rm -f "$PROJECT_ROOT/environments/production/.env.production" 2>/dev/null || true
     rm -f "$PROJECT_ROOT/.env.local"
     rm -f "$PROJECT_ROOT/.env.development"
-    rm -f "$PROJECT_ROOT/.env.build"
     
     print_status "Environment files cleaned!"
 }

@@ -91,8 +91,15 @@ pipeline {
             steps {
                 echo "🏗️ Building Next.js application"
                 sh '''
-                    # Copy build environment for local Next.js build
-                    cp .env.build .env.local
+                    # Verify .env.local exists
+                    if [ -f ".env.local" ]; then
+                        echo "✅ Using existing .env.local for build"
+                        head -n 3 .env.local
+                    else
+                        echo "❌ .env.local not found, creating minimal config"
+                        echo "NODE_ENV=production" > .env.local
+                        echo "NEXTAUTH_URL=http://localhost:3000" >> .env.local
+                    fi
                     
                     npm run build
                     

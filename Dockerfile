@@ -1,6 +1,7 @@
 ## Multi-stage Dockerfile for Next.js (standalone)
 ##  - Builds the app in a builder stage
 ##  - Produces a small runtime image containing only the standalone output
+## Auto trigger test: Updated on Oct 13, 2025
 
 # Use a full Node image for build stage (alpine is fine, but include libc)
 FROM node:18-alpine AS base

@@ -13,9 +13,9 @@ package-lock.json.old
 !.env.example
 !.env.*.example
 !.env.*.template
+!.env.local
 !environments/local/
 !environments/production/.env.template
-.env.local
 .env.development.local
 .env.test.local
 .env.production.local

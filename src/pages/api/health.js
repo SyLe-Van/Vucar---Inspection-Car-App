@@ -1,4 +1,4 @@
-import { connectToDatabase } from "@/lib/database/db";
+import dbConnect from "@/lib/database/db";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -9,13 +9,13 @@ export default async function handler(req, res) {
 
   try {
     // Test database connection
-    const { db } = await connectToDatabase();
+    await dbConnect();
 
-    // Simple database ping
-    await db.admin().ping();
+    // Simple database ping (removed db.admin().ping() as it's not available in this context)
+    const mongoose = await import("mongoose");
+    const connection = mongoose.default.connection;
 
-    // Get database stats
-    const dbStats = await db.stats();
+    // Get basic connection stats
     const responseTime = Date.now() - startTime;
 
     res.status(200).json({

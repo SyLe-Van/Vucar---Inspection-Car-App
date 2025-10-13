@@ -91,14 +91,15 @@ pipeline {
             steps {
                 echo "🏗️ Building Next.js application"
                 sh '''
-                    # Verify .env.local exists
+                    # Check if .env.local exists in the repository
                     if [ -f ".env.local" ]; then
-                        echo "✅ Using existing .env.local for build"
-                        head -n 3 .env.local
+                        echo "✅ Using existing .env.local from repository"
+                        echo "Environment variables loaded:"
+                        grep -E "^[A-Z]" .env.local | head -5 | sed 's/=.*/=***/'
                     else
-                        echo "❌ .env.local not found, creating minimal config"
-                        echo "NODE_ENV=production" > .env.local
-                        echo "NEXTAUTH_URL=http://localhost:3000" >> .env.local
+                        echo "❌ .env.local not found in repository"
+                        echo "Please ensure .env.local is committed to the repository"
+                        exit 1
                     fi
                     
                     npm run build

@@ -104,13 +104,16 @@ pipeline {
             steps {
                 echo "🏗️ Building Next.js application"
                 script {
+                    // Determine NODE_ENV based on branch
+                    def nodeEnv = env.BRANCH_NAME == 'main' ? 'production' : 'development'
+                    
                     // Create minimal environment file for build
-                    sh '''
+                    sh """
                         # Create temporary .env for build process
                         echo "Creating build environment variables..."
                         cat > .env << EOF
 MONGODB_URL=mongodb://localhost:27017/vucar-build
-NODE_ENV=${BRANCH_NAME == 'main' ? 'production' : 'development'}
+NODE_ENV=${nodeEnv}
 PORT=3000
 EOF
                         
@@ -141,7 +144,7 @@ EOF
                         
                         # Clean up temporary .env file
                         rm -f .env
-                    '''
+                    """
                 }
             }
             post {

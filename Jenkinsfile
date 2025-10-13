@@ -103,29 +103,46 @@ pipeline {
         stage('🏗️ Build Application') {
             steps {
                 echo "🏗️ Building Next.js application"
-                sh '''
-                    # Check if .env.local exists in the repository
-                    if [ -f ".env.local" ]; then
-                        echo "✅ Using existing .env.local from repository"
-                        echo "Environment variables loaded:"
-                        grep -E "^[A-Z]" .env.local | head -5 | sed 's/=.*/=***/'
-                    else
-                        echo "❌ .env.local not found in repository"
-                        echo "Please ensure .env.local is committed to the repository"
-                        exit 1
-                    fi
-                    
-                    npm run build
-                    
-                    # Verify build output
-                    if [ -d ".next" ]; then
-                        echo "✅ Next.js build successful"
-                        ls -la .next/
-                    else
-                        echo "❌ Build failed - .next directory not found"
-                        exit 1
-                    fi
-                '''
+                script {
+                    // Create minimal environment file for build
+                    sh '''
+                        # Create temporary .env for build process
+                        echo "Creating build environment variables..."
+                        cat > .env << EOF
+MONGODB_URL=mongodb://localhost:27017/vucar-build
+NODE_ENV=${BRANCH_NAME == 'main' ? 'production' : 'development'}
+PORT=3000
+EOF
+                        
+                        echo "✅ Build environment configured"
+                        echo "Environment variables:"
+                        cat .env | sed 's/=.*/=***/'
+                        
+                        # Run Next.js build
+                        echo "Building Next.js application..."
+                        npm run build
+                        
+                        # Verify build output
+                        if [ -d ".next" ]; then
+                            echo "✅ Next.js build successful"
+                            echo "Build output:"
+                            ls -lh .next/ | head -10
+                            
+                            # Check for standalone output (required for Docker)
+                            if [ -f ".next/standalone/server.js" ]; then
+                                echo "✅ Standalone build detected"
+                            else
+                                echo "⚠️  Standalone build not found (may affect Docker deployment)"
+                            fi
+                        else
+                            echo "❌ Build failed - .next directory not found"
+                            exit 1
+                        fi
+                        
+                        # Clean up temporary .env file
+                        rm -f .env
+                    '''
+                }
             }
             post {
                 success {

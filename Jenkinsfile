@@ -46,6 +46,13 @@ pipeline {
             steps {
                 echo "📥 Checking out source code"
                 checkout scm
+                
+                // Copy build environment file
+                sh '''
+                    echo "📋 Setting up build environment"
+                    cp .env.build .env.local
+                    echo "✅ Environment variables configured for build"
+                '''
             }
         }
         

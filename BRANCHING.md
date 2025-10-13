@@ -3,13 +3,15 @@
 ## Branch Structure
 
 ### 🚀 **main** (Production)
+
 - **Environment:** Production
 - **Database:** `vucar_production` collection
 - **URL:** `https://vucar.syledevops.live`
 - **Deployment:** Auto-deploy via Jenkins
 - **Security:** Production secrets
 
-### 🔧 **dev** (Development)  
+### 🔧 **dev** (Development)
+
 - **Environment:** Development
 - **Database:** `vucar_development` collection
 - **URL:** `http://localhost:3000`
@@ -19,6 +21,7 @@
 ## Environment Configuration
 
 ### Development (dev branch):
+
 - **File:** `.env.local`
 - **Database:** `vucar_development`
 - **URL:** `http://localhost:3000`
@@ -32,7 +35,8 @@ LOG_LEVEL=debug
 ```
 
 ### Production (main branch):
-- **File:** `.env.production` 
+
+- **File:** `.env.production`
 - **Database:** `vucar_production`
 - **URL:** `https://vucar.syledevops.live`
 

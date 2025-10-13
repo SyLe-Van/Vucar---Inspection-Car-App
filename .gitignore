@@ -13,14 +13,15 @@ package-lock.json.old
 !.env.example
 !.env.*.example
 !.env.*.template
-!.env.local
-!.env.production
-!environments/local/
-!environments/production/.env.template
+.env.local
+.env.development
 .env.development.local
+.env.test
 .env.test.local
+.env.production
 .env.production.local
 .env.staging
+.env.staging.local
 
 # Production environment files
 environments/production/.env.production

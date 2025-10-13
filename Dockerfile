@@ -22,6 +22,12 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
+# Set build environment variables (dummy values for build)
+ENV MONGODB_URL=mongodb://localhost:27017/vucar-build
+ENV NEXTAUTH_URL=http://localhost:3000
+ENV NEXTAUTH_SECRET=build-dummy-secret-32-chars-long-abc123def456
+ENV NODE_ENV=production
+
 # Ensure Next is configured to output standalone server (next.config.js: output: 'standalone')
 RUN npm run build
 
@@ -53,7 +59,7 @@ EXPOSE 3000
 
 # Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD node -e "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"
+    CMD node -e "require('http').get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }).on('error', () => process.exit(1))"
 
 # Use dumb-init for proper signal handling
 ENTRYPOINT ["dumb-init", "--"]

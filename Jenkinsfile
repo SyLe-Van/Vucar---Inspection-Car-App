@@ -41,13 +41,6 @@ pipeline {
             steps {
                 echo "📥 Checking out source code"
                 checkout scm
-                
-                // Copy build environment file
-                sh '''
-                    echo "📋 Setting up build environment"
-                    cp .env.build .env.local
-                    echo "✅ Environment variables configured for build"
-                '''
             }
         }
         
@@ -98,6 +91,9 @@ pipeline {
             steps {
                 echo "🏗️ Building Next.js application"
                 sh '''
+                    # Copy build environment for local Next.js build
+                    cp .env.build .env.local
+                    
                     npm run build
                     
                     # Verify build output

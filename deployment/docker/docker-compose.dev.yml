@@ -1,0 +1,47 @@
+# Docker Compose for Local Development
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:7
+    container_name: vucar-mongo-dev
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: vucar_development
+    volumes:
+      - vucar_mongo_dev_data:/data/db
+    networks:
+      - vucar-network-dev
+
+  vucar-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        MONGODB_URL: mongodb://mongodb:27017/vucar_development
+        NEXTAUTH_URL: http://localhost:3000
+        NODE_ENV: development
+    container_name: vucar-app-dev
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      MONGODB_URL: mongodb://mongodb:27017/vucar_development
+      NODE_ENV: development
+    depends_on:
+      - mongodb
+    networks:
+      - vucar-network-dev
+    volumes:
+      - .:/app
+      - /app/node_modules
+      - /app/.next
+
+volumes:
+  vucar_mongo_dev_data:
+
+networks:
+  vucar-network-dev:
+    driver: bridge

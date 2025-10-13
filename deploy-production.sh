@@ -56,7 +56,11 @@ fi
 # Check environment variables
 if [ ! -f ".env.production" ]; then
     log_error ".env.production file not found"
-    log_info "Please create .env.production based on .env.production.example"
+    log_info "Please run one of these commands first:"
+    log_info "1. ./load-env.sh (if using simple secure setup)"
+    log_info "2. ./scripts/setup-simple-secure-env.sh (recommended - free)"
+    log_info "3. ./scripts/setup-free-secure-env.sh (advanced encryption)"
+    log_info "4. cp .env.production.example .env.production (manual)"
     exit 1
 fi
 

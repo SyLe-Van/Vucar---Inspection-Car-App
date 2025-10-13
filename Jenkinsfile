@@ -139,6 +139,64 @@ pipeline {
             }
         }
         
+        stage('🚀 Deploy to Production') {
+            when {
+                branch 'main'
+            }
+            steps {
+                script {
+                    echo "🚀 Deploying to Production Environment (Local Server)"
+                    
+                    // Deploy locally on same server as Jenkins
+                    sh '''
+                        # Production deployment directory
+                        DEPLOY_DIR="/opt/vucar-production"
+                        
+                        echo "📦 Deploying Docker image: ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}"
+                        
+                        # Create deployment directory
+                        sudo mkdir -p $DEPLOY_DIR
+                        sudo chown jenkins:jenkins $DEPLOY_DIR || sudo chown $USER:$USER $DEPLOY_DIR
+                        
+                        # Copy deployment files
+                        cp docker-compose.production.yml $DEPLOY_DIR/docker-compose.yml
+                        cp nginx.production.conf $DEPLOY_DIR/nginx.conf
+                        cp .env.production $DEPLOY_DIR/.env
+                        cp deploy-production.sh $DEPLOY_DIR/
+                        
+                        # Set environment variables
+                        cd $DEPLOY_DIR
+                        export DOCKER_TAG=${DOCKER_TAG}
+                        export DOCKER_REGISTRY=${DOCKER_REGISTRY}
+                        export DOCKER_IMAGE_NAME=${DOCKER_IMAGE_NAME}
+                        
+                        # Stop existing containers
+                        sudo docker-compose down || echo "No existing containers"
+                        
+                        # Pull latest image
+                        sudo docker pull ${DOCKER_REGISTRY}/${DOCKER_IMAGE_NAME}:${DOCKER_TAG}
+                        
+                        # Start new containers
+                        sudo docker-compose up -d
+                        
+                        # Wait and health check
+                        sleep 30
+                        curl -f http://localhost:3000/api/health || exit 1
+                        
+                        echo "✅ Deployment completed successfully!"
+                    '''
+                }
+            }
+            post {
+                success {
+                    echo "✅ Production deployment completed successfully!"
+                }
+                failure {
+                    echo "❌ Production deployment failed!"
+                }
+            }
+        }
+        
         stage('✅ CI/CD Complete') {
             steps {
                 script {

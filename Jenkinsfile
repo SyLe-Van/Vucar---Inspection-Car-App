@@ -180,36 +180,68 @@ EOF
             }
         }
         
-        stage('Deploy to Production') {
+        stage('🚀 Deploy to Production') {
             when {
                 branch 'main'
                 expression { params.DEPLOY_TO_PRODUCTION == true }
             }
             steps {
-                echo "🚀 Deploying to Production..."
+                echo "🚀 Deploying to Production Server..."
                 script {
-                    // Use Jenkins secrets for production environment
+                    // Use Jenkins SSH credentials to deploy
                     withCredentials([
-                        string(credentialsId: 'mongodb-uri-production', variable: 'MONGODB_URL')
+                        string(credentialsId: 'mongodb-uri-production', variable: 'MONGODB_URL'),
+                        sshUserPrivateKey(credentialsId: 'production-server-ssh', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
                     ]) {
-                        // Create production environment file from secrets
-                        sh '''
-                            echo "NODE_ENV=production" > .env.production
-                            echo "MONGODB_URL=${MONGODB_URL}" >> .env.production
-                            echo "PORT=3000" >> .env.production
-                            echo "DEBUG=false" >> .env.production
-                            echo "LOG_LEVEL=warn" >> .env.production
-                        '''
+                        def dockerImageName = env.DOCKER_IMAGE_NAME
+                        def dockerTag = env.DOCKER_TAG
                         
-                        // Deploy using docker-compose
-                        sh 'docker-compose -f deployment/docker/docker-compose.production.yml up -d --build'
-                        sh 'docker-compose -f deployment/docker/docker-compose.production.yml logs --tail=50'
-                        
-                        // Clean up environment file after deployment
-                        sh 'rm -f .env.production'
+                        sh """
+                            # SSH to production server and deploy
+                            ssh -o StrictHostKeyChecking=no -i \${SSH_KEY} \${SSH_USER}@3.0.19.202 << 'EOF'
+set -e
+echo "📦 Pulling latest code..."
+cd /opt/vucar-production
+git pull origin main
+
+echo "🐳 Pulling latest Docker image..."
+docker pull ${dockerImageName}:${dockerTag}
+
+echo "🔄 Stopping old container..."
+docker stop vucar-production || true
+docker rm vucar-production || true
+
+echo "🚀 Starting new container..."
+docker run -d \\
+    --name vucar-production \\
+    --restart unless-stopped \\
+    -p 3000:3000 \\
+    -e MONGODB_URL="\${MONGODB_URL}" \\
+    -e NODE_ENV=production \\
+    -e PORT=3000 \\
+    ${dockerImageName}:${dockerTag}
+
+echo "⏳ Waiting for application to start..."
+sleep 10
+
+echo "🔍 Checking application health..."
+curl -f http://localhost:3000/api/health || exit 1
+
+echo "✅ Deployment successful!"
+docker logs vucar-production --tail=20
+EOF
+                        """
                     }
                 }
                 echo "✅ Production deployment completed"
+            }
+            post {
+                success {
+                    echo "🎉 Deployment to production successful!"
+                }
+                failure {
+                    echo "❌ Deployment to production failed!"
+                }
             }
         }
         

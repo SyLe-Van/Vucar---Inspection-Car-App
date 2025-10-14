@@ -1,7 +1,7 @@
 # VuCar - Professional Car Inspection Management System
 
 A comprehensive car inspection management platform built with Next.js, TypeScript, and MongoDB Atlas. Features enterprise-grade architecture with automated CI/CD pipeline deployment to AWS EC2.
-
+T
 🌐 **Production:** https://vucar.syledevops.live  
 � **Docker Hub:** [syle712/vucar-app](https://hub.docker.com/r/syle712/vucar-app)  
 �🚀 **CI/CD:** Jenkins Pipeline with automated deployment
@@ -883,7 +883,7 @@ sudo certbot certificates
 
 ## 📄 License
 
-This project is private and proprietary.
+This project is public and proprietary.
 
 ---
 

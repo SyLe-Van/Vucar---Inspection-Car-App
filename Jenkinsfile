@@ -1,14 +1,23 @@
 pipeline {
     agent any
     
+    parameters {
+        booleanParam(
+            name: 'DEPLOY_TO_PRODUCTION',
+            defaultValue: false,
+            description: 'Deploy to production server after approval?'
+        )
+    }
+    
     environment {
         // Docker Configuration
         DOCKER_REGISTRY = 'docker.io'
         DOCKER_IMAGE_NAME = 'syle712/vucar-app'
         DOCKER_CREDENTIALS_ID = 'docker-registry-credentials'
         
-        // Branch-specific Docker tagging
-        DOCKER_TAG = "${env.BRANCH_NAME == 'main' ? 'v1.0.' + env.BUILD_NUMBER : env.BRANCH_NAME + '-' + env.BUILD_NUMBER}"
+        // Production Server Configuration
+        PRODUCTION_SERVER_IP = '18.141.38.4'
+        PRODUCTION_CONTAINER_NAME = 'vucar-production-new'
         
         // Application Configuration
         NODE_VERSION = '18'
@@ -32,20 +41,22 @@ pipeline {
         stage('🔍 Initialize') {
             steps {
                 script {
-                    echo "🌿 Branch: ${env.BRANCH_NAME}"
-                    
-                    // Branch-specific configuration
+                    // Set Docker tag based on branch
                     if (env.BRANCH_NAME == 'main') {
-                        echo "� PRODUCTION Pipeline"
+                        env.DOCKER_TAG = "v1.0.${env.BUILD_NUMBER}"
+                        echo "🚀 PRODUCTION Pipeline"
                         echo "📁 Environment: .env.production"
-                        echo "�🐳 Docker tag: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
-                        echo "🎯 Mode: Full CI/CD with Manual Approval + Deploy"
+                        echo "🐳 Docker tag: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
+                        echo "🎯 Mode: Full CI/CD with Deploy Option"
                     } else {
+                        env.DOCKER_TAG = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
                         echo "🔧 DEVELOPMENT Pipeline"
                         echo "📁 Environment: .env.local"
                         echo "🐳 Docker tag: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
                         echo "🎯 Mode: CI/CD Testing (No Deployment)"
                     }
+                    echo "🌿 Branch: ${env.BRANCH_NAME}"
+                    echo "📦 Deploy to Production: ${params.DEPLOY_TO_PRODUCTION}"
                 }
             }
         }
@@ -81,19 +92,16 @@ pipeline {
                             fi
                         '''
                     }
-                    post {
-                        always {
-                            echo "📊 Lint check completed"
-                        }
-                    }
                 }
-                
-                stage('Security Audit') {
+                stage('Type Check') {
                     steps {
-                        echo "🔒 Running security audit"
+                        echo "📝 Checking TypeScript types"
                         sh '''
-                            npm audit --audit-level moderate || echo "Security audit completed with warnings"
-                            npm outdated || echo "Dependency check completed"
+                            if [ -f "tsconfig.json" ]; then
+                                npx tsc --noEmit --skipLibCheck || echo "Type check completed with warnings"
+                            else
+                                echo "No TypeScript configuration found, skipping"
+                            fi
                         '''
                     }
                 }
@@ -103,49 +111,11 @@ pipeline {
         stage('🏗️ Build Application') {
             steps {
                 echo "🏗️ Building Next.js application"
-                script {
-                    // Determine NODE_ENV based on branch
-                    def nodeEnv = env.BRANCH_NAME == 'main' ? 'production' : 'development'
-                    
-                    // Create minimal environment file for build
-                    sh """
-                        # Create temporary .env for build process
-                        echo "Creating build environment variables..."
-                        cat > .env << EOF
-MONGODB_URL=mongodb://localhost:27017/vucar-build
-NODE_ENV=${nodeEnv}
-PORT=3000
-EOF
-                        
-                        echo "✅ Build environment configured"
-                        echo "Environment variables:"
-                        cat .env | sed 's/=.*/=***/'
-                        
-                        # Run Next.js build
-                        echo "Building Next.js application..."
-                        npm run build
-                        
-                        # Verify build output
-                        if [ -d ".next" ]; then
-                            echo "✅ Next.js build successful"
-                            echo "Build output:"
-                            ls -lh .next/ | head -10
-                            
-                            # Check for standalone output (required for Docker)
-                            if [ -f ".next/standalone/server.js" ]; then
-                                echo "✅ Standalone build detected"
-                            else
-                                echo "⚠️  Standalone build not found (may affect Docker deployment)"
-                            fi
-                        else
-                            echo "❌ Build failed - .next directory not found"
-                            exit 1
-                        fi
-                        
-                        # Clean up temporary .env file
-                        rm -f .env
-                    """
-                }
+                sh '''
+                    echo "Building application..."
+                    npm run build
+                    echo "Build completed successfully"
+                '''
             }
             post {
                 success {
@@ -167,7 +137,7 @@ EOF
             }
         }
         
-        stage(' Push Docker Image') {
+        stage('📤 Push Docker Image') {
             steps {
                 script {
                     echo "📤 Pushing Docker image to registry"
@@ -183,61 +153,103 @@ EOF
         stage('🚀 Deploy to Production') {
             when {
                 branch 'main'
-                expression { params.DEPLOY_TO_PRODUCTION == true }
             }
             steps {
-                echo "🚀 Deploying to Production Server..."
                 script {
-                    // Use Jenkins SSH credentials to deploy
-                    withCredentials([
-                        string(credentialsId: 'mongodb-uri-production', variable: 'MONGODB_URL'),
-                        sshUserPrivateKey(credentialsId: 'production-server-ssh', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
-                    ]) {
-                        sh """
-                            # SSH to production server and deploy
-                            ssh -o StrictHostKeyChecking=no -i \${SSH_KEY} \${SSH_USER}@3.0.19.202 '
-                                set -e
-                                echo "📦 Pulling latest code..."
-                                cd /opt/vucar-production
-                                git pull origin main
-                                
-                                echo "🐳 Pulling latest Docker image..."
-                                docker pull ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}
-                                
-                                echo "🔄 Stopping old container..."
-                                docker stop vucar-production || true
-                                docker rm vucar-production || true
-                                
-                                echo "🚀 Starting new container..."
-                                docker run -d \\
-                                    --name vucar-production \\
-                                    --restart unless-stopped \\
-                                    -p 3000:3000 \\
-                                    -e MONGODB_URL="${MONGODB_URL}" \\
-                                    -e NODE_ENV=production \\
-                                    -e PORT=3000 \\
-                                    ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}
-                                
-                                echo "⏳ Waiting for application to start..."
-                                sleep 10
-                                
-                                echo "🔍 Checking application health..."
-                                curl -f http://localhost:3000/api/health || exit 1
-                                
-                                echo "✅ Deployment successful!"
-                                docker logs vucar-production --tail=20
-                            '
-                        """
+                    if (params.DEPLOY_TO_PRODUCTION) {
+                        echo "🚀 Deploying to Production Server..."
+                        
+                        // Use Jenkins SSH credentials to deploy
+                        withCredentials([
+                            string(credentialsId: 'mongodb-uri-production', variable: 'MONGODB_URL'),
+                            sshUserPrivateKey(credentialsId: 'production-server-ssh', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
+                        ]) {
+                            sh """
+                                # SSH to production server and deploy
+                                ssh -o StrictHostKeyChecking=no -i \${SSH_KEY} \${SSH_USER}@${env.PRODUCTION_SERVER_IP} '
+                                    set -e
+                                    
+                                    echo "🔍 Current environment:"
+                                    echo "  Docker tag: ${env.DOCKER_TAG}"
+                                    echo "  Image: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
+                                    echo "  Container: ${env.PRODUCTION_CONTAINER_NAME}"
+                                    echo "  Server IP: ${env.PRODUCTION_SERVER_IP}"
+                                    
+                                    echo "🐳 Pulling latest Docker image..."
+                                    docker pull ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}
+                                    
+                                    echo "🔄 Stopping old container..."
+                                    docker stop ${env.PRODUCTION_CONTAINER_NAME} 2>/dev/null || echo "Container not running"
+                                    docker rm ${env.PRODUCTION_CONTAINER_NAME} 2>/dev/null || echo "Container not found"
+                                    
+                                    echo "🧹 Cleaning up old images..."
+                                    docker image prune -f
+                                    
+                                    echo "🚀 Starting new container..."
+                                    docker run -d \\
+                                        --name ${env.PRODUCTION_CONTAINER_NAME} \\
+                                        --restart unless-stopped \\
+                                        -p 3000:3000 \\
+                                        -e MONGODB_URL="\${MONGODB_URL}" \\
+                                        -e NODE_ENV=production \\
+                                        -e PORT=3000 \\
+                                        ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}
+                                    
+                                    echo "⏳ Waiting for application to start..."
+                                    sleep 20
+                                    
+                                    echo "📊 Container status:"
+                                    docker ps -a | grep ${env.PRODUCTION_CONTAINER_NAME} || echo "Container not found in ps"
+                                    
+                                    echo "📝 Container logs (last 30 lines):"
+                                    docker logs ${env.PRODUCTION_CONTAINER_NAME} --tail=30 2>&1 || echo "No logs available"
+                                    
+                                    echo "🔍 Checking application health..."
+                                    HEALTH_CHECK_PASSED=false
+                                    for i in {1..6}; do
+                                        echo "  Attempt \$i/6..."
+                                        if curl -f http://localhost:3000/api/health 2>/dev/null; then
+                                            echo "✅ Health check passed!"
+                                            HEALTH_CHECK_PASSED=true
+                                            break
+                                        fi
+                                        if [ \$i -lt 6 ]; then
+                                            echo "  ⏳ Waiting 10 seconds before retry..."
+                                            sleep 10
+                                        fi
+                                    done
+                                    
+                                    if [ "\$HEALTH_CHECK_PASSED" = false ]; then
+                                        echo "⚠️  Health check failed after 6 attempts"
+                                        echo "📝 Full container logs:"
+                                        docker logs ${env.PRODUCTION_CONTAINER_NAME} 2>&1
+                                        exit 1
+                                    fi
+                                    
+                                    echo "✅ Deployment completed successfully!"
+                                '
+                            """
+                        }
+                    } else {
+                        echo "⏭️  Skipping deployment (DEPLOY_TO_PRODUCTION=false)"
+                        echo "💡 To deploy, re-run the pipeline with DEPLOY_TO_PRODUCTION=true"
                     }
                 }
-                echo "✅ Production deployment completed"
             }
             post {
                 success {
-                    echo "🎉 Deployment to production successful!"
+                    script {
+                        if (params.DEPLOY_TO_PRODUCTION) {
+                            echo "🎉 Deployment to production successful!"
+                        }
+                    }
                 }
                 failure {
-                    echo "❌ Deployment to production failed!"
+                    script {
+                        if (params.DEPLOY_TO_PRODUCTION) {
+                            echo "❌ Deployment to production failed!"
+                        }
+                    }
                 }
             }
         }
@@ -248,33 +260,11 @@ EOF
             }
             steps {
                 script {
-                    echo "🔧 DEVELOPMENT BUILD COMPLETE"
-                    echo "┌─────────────────────────────────────┐"
-                    echo "│  ✅ Code Quality: PASSED            │"
-                    echo "│  ✅ Tests: PASSED                   │"
-                    echo "│  ✅ Build: SUCCESSFUL               │"
-                    echo "│  � Docker Image: BUILT             │"
-                    echo "│  📦 Image: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
-                    echo "│  � Deployment: SKIPPED (Dev Only)  │"
-                    echo "└─────────────────────────────────────┘"
-                    echo "💡 To deploy: Merge to main branch"
-                }
-            }
-        }
-        
-        stage('✅ CI/CD Complete') {
-            when {
-                branch 'main'
-            }
-            steps {
-                script {
-                    echo "🎉 PRODUCTION PIPELINE COMPLETED!"
-                    echo "┌─────────────────────────────────────┐"
-                    echo "│  ✅ All Stages: PASSED             │"
-                    echo "│  🚀 Deployment: SUCCESSFUL         │"
-                    echo "│  📦 Image: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
-                    echo "│  🌐 Live: https://vucar.syledevops.live"
-                    echo "└─────────────────────────────────────┘"
+                    echo "📊 Development Build Summary"
+                    echo "  Branch: ${env.BRANCH_NAME}"
+                    echo "  Docker Image: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
+                    echo "  Build Number: ${env.BUILD_NUMBER}"
+                    echo "  Status: CI/CD Testing Only (No Deployment)"
                 }
             }
         }
@@ -282,58 +272,14 @@ EOF
     
     post {
         always {
-            script {
-                // Comprehensive cleanup to save memory & space
-                sh '''
-                    echo "🧹 Cleaning up to free memory..."
-                    
-                    # Clean npm cache
-                    npm cache clean --force 2>/dev/null || true
-                    
-                    # Clean node_modules cache
-                    rm -rf node_modules/.cache 2>/dev/null || true
-                    
-                    # Clean Docker aggressively
-                    docker image prune -f
-                    docker builder prune -f 2>/dev/null || true
-                    docker system prune -f
-                    
-                    # Show final status
-                    echo "📊 Final disk usage:"
-                    docker system df
-                    du -sh node_modules 2>/dev/null || echo "No node_modules"
-                '''
-            }
-        }
-        
-        success {
-            script {
-                if (env.BRANCH_NAME == 'main') {
-                    echo "🎉 PRODUCTION DEPLOYMENT SUCCESSFUL!"
-                    echo "🌐 Application is live at: https://vucar.syledevops.live"
-                } else {
-                    echo "🎉 DEVELOPMENT BUILD SUCCESSFUL!"
-                    echo "🐳 Docker image ready: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
-                    echo "💡 Ready for testing or merge to main"
-                }
-            }
-        }
-        
-        failure {
-            script {
-                if (env.BRANCH_NAME == 'main') {
-                    echo "❌ PRODUCTION PIPELINE FAILED!"
-                    echo "🚨 Production deployment unsuccessful"
-                } else {
-                    echo "❌ DEVELOPMENT PIPELINE FAILED!"
-                    echo "🔧 Fix issues before merging to main"
-                }
-            }
-        }
-        
-        cleanup {
-            echo "🧹 Cleaning up workspace"
+            echo "🧹 Cleaning workspace"
             cleanWs()
+        }
+        success {
+            echo "✅ Pipeline completed successfully!"
+        }
+        failure {
+            echo "❌ Pipeline failed!"
         }
     }
 }

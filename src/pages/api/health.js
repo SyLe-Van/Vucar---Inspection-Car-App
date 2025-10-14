@@ -1,4 +1,5 @@
 import dbConnect from "@/lib/database/db";
+import mongoose from "mongoose";
 
 export default async function handler(req, res) {
   if (req.method !== "GET") {
@@ -11,11 +12,14 @@ export default async function handler(req, res) {
     // Test database connection
     await dbConnect();
 
-    // Simple database ping (removed db.admin().ping() as it's not available in this context)
-    const mongoose = await import("mongoose");
-    const connection = mongoose.default.connection;
+    // Check mongoose connection state
+    const connection = mongoose.connection;
+    const isConnected = connection.readyState === 1;
 
-    // Get basic connection stats
+    if (!isConnected) {
+      throw new Error("Database not connected");
+    }
+
     const responseTime = Date.now() - startTime;
 
     res.status(200).json({
@@ -27,11 +31,9 @@ export default async function handler(req, res) {
       version: process.env.APP_VERSION || "1.0.0",
       database: {
         status: "connected",
-        name: dbStats.db,
-        collections: dbStats.collections,
-        dataSize: `${
-          Math.round((dbStats.dataSize / 1024 / 1024) * 100) / 100
-        } MB`,
+        name: connection.name || "unknown",
+        host: connection.host || "unknown",
+        readyState: connection.readyState,
       },
       system: {
         nodeVersion: process.version,

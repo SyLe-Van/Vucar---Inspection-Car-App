@@ -15,8 +15,9 @@ async function dbConnect() {
     return cached.conn;
   }
 
-  // Read MONGODB_URL dynamically at connection time, not module load time
-  const MONGODB_URL = appConfig.database.url;
+  // Đọc biến môi trường động mỗi lần gọi
+  const getMongoUrl = () => appConfig.database.url;
+  const MONGODB_URL = getMongoUrl();
 
   if (!MONGODB_URL) {
     throw new Error(

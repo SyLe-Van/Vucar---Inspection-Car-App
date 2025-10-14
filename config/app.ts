@@ -38,7 +38,7 @@ export const appConfig = {
   get env(): EnvironmentConfig {
     return {
       NODE_ENV: (process.env.NODE_ENV as EnvironmentConfig["NODE_ENV"]) || "development",
-      MONGODB_URL: process.env.MONGODB_URL!,
+      MONGODB_URI: process.env.MONGODB_URI!,
       PORT: parseInt(process.env.PORT || "3000", 10),
     };
   },

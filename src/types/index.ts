@@ -180,7 +180,7 @@ export interface DatabaseConfig {
 // Environment types
 export interface EnvironmentConfig {
   NODE_ENV: "development" | "production" | "test";
-  MONGODB_URL: string;
+  MONGODB_URI: string;
   PORT: number;
 }
 

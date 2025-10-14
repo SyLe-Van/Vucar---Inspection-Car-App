@@ -30,8 +30,8 @@ ARG NODE_ENV=production
 
 # Set environment variables for build process
 ENV NODE_ENV=$NODE_ENV
-# Provide dummy MONGODB_URL for Next.js build validation (real URL provided at runtime)
-ENV MONGODB_URL="mongodb://localhost:27017/vucar-build"
+# Provide dummy MONGODB_URI for Next.js build validation (real URL provided at runtime)
+ENV MONGODB_URI="mongodb://localhost:27017/vucar-build"
 
 # Ensure Next is configured to output standalone server (next.config.js: output: 'standalone')
 RUN npm run build

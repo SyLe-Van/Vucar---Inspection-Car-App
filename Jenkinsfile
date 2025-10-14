@@ -201,9 +201,9 @@ pipeline {
                                     
                                     # Run migration using Docker with auto-migrate script
                                     docker run --rm \\
-                                        -e MONGODB_URI="\${MONGODB_URL}" \\
+                                        -e MONGODB_URI="$MONGODB_URL" \\
                                         ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG} \\
-                                        /bin/bash /app/scripts/auto-migrate.sh "\${MONGODB_URL}"
+                                        /bin/bash /app/scripts/auto-migrate.sh "$MONGODB_URL"
                                     
                                     echo "✅ Migration completed successfully!"
                                 '
@@ -241,7 +241,7 @@ pipeline {
                                         echo "  Server IP: ${env.PRODUCTION_SERVER_IP}"
                                         
                                         # Set MongoDB URL with fallback
-                                        MONGO_URL="\${MONGODB_URL}"
+                                        MONGO_URL="$MONGODB_URL"
                                         
                                         echo "🐳 Pulling latest Docker image..."
                                         docker pull ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}

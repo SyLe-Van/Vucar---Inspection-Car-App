@@ -37,7 +37,7 @@ jest.mock("next/image", () => ({
 }));
 
 // Mock environment variables
-process.env.MONGODB_URL = "mongodb://localhost:27017/vucar_test";
+process.env.MONGODB_URI = "mongodb://localhost:27017/vucar_test";
 process.env.NODE_ENV = "test";
 
 // Global test utilities

@@ -2,7 +2,7 @@ const { MongoClient } = require("mongodb");
 
 // Đọc connection string từ environment variable
 const uri =
-  process.env.MONGODB_URL ||
+  process.env.MONGODB_URI ||
   "mongodb+srv://vucar-prod-user:YOUR_PASSWORD@vucar-production.xxxxx.mongodb.net/vucar_production?retryWrites=true&w=majority";
 
 const client = new MongoClient(uri);

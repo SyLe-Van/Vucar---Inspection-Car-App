@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
 import { appConfig } from "@/config/app";
 
-const MONGODB_URL = appConfig.database.url;
+const MONGODB_URI = appConfig.database.url;
 
-if (!MONGODB_URL) {
+if (!MONGODB_URI) {
   throw new Error(
-    "Please define the MONGODB_URL environment variable inside .env.local"
+    "Please define the MONGODB_URI environment variable inside .env.local"
   );
 }
 
@@ -30,7 +30,7 @@ async function dbConnect() {
       serverSelectionTimeoutMS: 30000,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URL, opts).then(mongoose => {
+    cached.promise = mongoose.connect(MONGODB_URI, opts).then(mongoose => {
       return mongoose;
     });
   }

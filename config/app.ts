@@ -7,7 +7,7 @@ import { EnvironmentConfig } from "@/types";
 
 // Validate required environment variables
 const requiredEnvVars = [
-  "MONGODB_URL",
+  "MONGODB_URI",
 ] as const;
 
 function validateEnvironment(): EnvironmentConfig {
@@ -27,7 +27,7 @@ function validateEnvironment(): EnvironmentConfig {
 
   return {
     NODE_ENV: (process.env.NODE_ENV as EnvironmentConfig["NODE_ENV"]) || "development",
-    MONGODB_URL: process.env.MONGODB_URL!,
+    MONGODB_URI: process.env.MONGODB_URI!,
     PORT: parseInt(process.env.PORT || "3000", 10),
   };
 }
@@ -45,10 +45,10 @@ export const appConfig = {
 
   // Database configuration
   database: {
-    // Read MONGODB_URL dynamically at runtime (not cached at build time)
+    // Read MONGODB_URI dynamically at runtime (not cached at build time)
     get url() {
-      const url = process.env.MONGODB_URL;
-      console.log('🔍 [DB Config] Reading MONGODB_URL:', url ? url.substring(0, 20) + '...' : 'undefined');
+      const url = process.env.MONGODB_URI;
+      console.log('🔍 [DB Config] Reading MONGODB_URI:', url ? url.substring(0, 20) + '...' : 'undefined');
       return url!;
     },
     options: {

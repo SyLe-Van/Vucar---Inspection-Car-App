@@ -243,14 +243,6 @@ pipeline {
                                         # Set MongoDB URL with fallback
                                         MONGO_URL="\${MONGODB_URL}"
                                         
-                                        # Debug: Check if MongoDB URL is set
-                                        if [ -z "\$MONGO_URL" ]; then
-                                            echo "⚠️  Warning: MONGODB_URL is empty, using fallback"
-                                            MONGO_URL="mongodb+srv://sycung9001:-pQk2Ht-%2ARdH7LT@cluster0.uy3at.mongodb.net/vucar_production?retryWrites=true&w=majority&appName=Cluster0"
-                                        else
-                                            echo "✅ Using MONGODB_URL from Jenkins credentials"
-                                        fi
-                                        
                                         echo "🐳 Pulling latest Docker image..."
                                         docker pull ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}
                                         
@@ -262,15 +254,11 @@ pipeline {
                                         docker image prune -f
                                         
                                         echo "🚀 Starting new container..."
-                                        
-                                        # Debug: Show MongoDB connection (hide password)
-                                        echo "📊 MongoDB: \${MONGO_URL%%@*}@***"
-                                        
                                         docker run -d \\
                                             --name ${env.PRODUCTION_CONTAINER_NAME} \\
                                             --restart unless-stopped \\
                                             -p 3000:3000 \\
-                                            -e MONGODB_URL="\$MONGO_URL" \\
+                                            -e MONGODB_URI="\$MONGO_URL" \\
                                             -e NODE_ENV=production \\
                                             -e PORT=3000 \\
                                             ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}
@@ -325,7 +313,6 @@ pipeline {
                                     
                                     # Fallback MongoDB URL
                                     MONGO_URL="mongodb+srv://sycung9001:-pQk2Ht-%2ARdH7LT@cluster0.uy3at.mongodb.net/vucar_production?retryWrites=true&w=majority&appName=Cluster0"
-                                    echo "⚠️  Using fallback MongoDB URL"
                                     
                                     echo "🐳 Pulling latest Docker image..."
                                     docker pull ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}
@@ -338,11 +325,6 @@ pipeline {
                                     docker image prune -f
                                     
                                     echo "🚀 Starting new container..."
-                                    
-                                    # Debug: Show MongoDB connection (hide password)  
-                                    MONGO_DEBUG=\$(echo "\$MONGO_URL" | sed 's|://[^:]*:[^@]*@|://***:***@|')
-                                    echo "📊 MongoDB: \$MONGO_DEBUG"
-                                    
                                     docker run -d \\
                                         --name ${env.PRODUCTION_CONTAINER_NAME} \\
                                         --restart unless-stopped \\

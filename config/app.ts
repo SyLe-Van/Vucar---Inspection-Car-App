@@ -39,7 +39,10 @@ export const appConfig = {
 
   // Database configuration
   database: {
-    url: process.env.MONGODB_URL!,
+    // Read MONGODB_URL dynamically at runtime (not cached at build time)
+    get url() {
+      return process.env.MONGODB_URL!;
+    },
     options: {
       useNewUrlParser: true,
       useUnifiedTopology: true,

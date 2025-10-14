@@ -264,7 +264,7 @@ pipeline {
                                         echo "🚀 Starting new container..."
                                         
                                         # Debug: Show MongoDB connection (hide password)
-                                        MONGO_DEBUG=\$(echo "\$MONGO_URL" | sed 's/:\/\/[^:]*:[^@]*@/:\/\/***:***@/')
+                                        MONGO_DEBUG=\$(echo "\$MONGO_URL" | sed 's|://[^:]*:[^@]*@|://***:***@|')
                                         echo "📊 MongoDB: \$MONGO_DEBUG"
                                         
                                         docker run -d \\
@@ -341,7 +341,7 @@ pipeline {
                                     echo "🚀 Starting new container..."
                                     
                                     # Debug: Show MongoDB connection (hide password)  
-                                    MONGO_DEBUG=\$(echo "\$MONGO_URL" | sed 's/:\/\/[^:]*:[^@]*@/:\/\/***:***@/')
+                                    MONGO_DEBUG=\$(echo "\$MONGO_URL" | sed 's|://[^:]*:[^@]*@|://***:***@|')
                                     echo "📊 MongoDB: \$MONGO_DEBUG"
                                     
                                     docker run -d \\

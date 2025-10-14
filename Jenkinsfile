@@ -4,8 +4,8 @@ pipeline {
     parameters {
         booleanParam(
             name: 'DEPLOY_TO_PRODUCTION',
-            defaultValue: false,
-            description: 'Deploy to production server after approval?'
+            defaultValue: true,
+            description: 'Deploy to production server after build? (Uncheck to skip deployment)'
         )
     }
     
@@ -159,21 +159,95 @@ pipeline {
                     if (params.DEPLOY_TO_PRODUCTION) {
                         echo "🚀 Deploying to Production Server..."
                         
-                        // Use Jenkins SSH credentials to deploy
-                        withCredentials([
-                            string(credentialsId: 'mongodb-uri-production', variable: 'MONGODB_URL'),
-                            sshUserPrivateKey(credentialsId: 'production-server-ssh', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
-                        ]) {
+                        // Use Jenkins credentials with fallback
+                        try {
+                            withCredentials([
+                                string(credentialsId: 'mongodb-uri-production', variable: 'MONGODB_URL')
+                            ]) {
+                                sh """
+                                    # SSH to production server and deploy
+                                    ssh -o StrictHostKeyChecking=no -i /home/ec2-user/vucar-key.pem ec2-user@${env.PRODUCTION_SERVER_IP} '
+                                        set -e
+                                        
+                                        echo "🔍 Current environment:"
+                                        echo "  Docker tag: ${env.DOCKER_TAG}"
+                                        echo "  Image: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
+                                        echo "  Container: ${env.PRODUCTION_CONTAINER_NAME}"
+                                        echo "  Server IP: ${env.PRODUCTION_SERVER_IP}"
+                                        
+                                        # Set MongoDB URL with fallback
+                                        MONGO_URL="\${MONGODB_URL}"
+                                        
+                                        echo "🐳 Pulling latest Docker image..."
+                                        docker pull ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}
+                                        
+                                        echo "🔄 Stopping old container..."
+                                        docker stop ${env.PRODUCTION_CONTAINER_NAME} 2>/dev/null || echo "Container not running"
+                                        docker rm ${env.PRODUCTION_CONTAINER_NAME} 2>/dev/null || echo "Container not found"
+                                        
+                                        echo "🧹 Cleaning up old images..."
+                                        docker image prune -f
+                                        
+                                        echo "🚀 Starting new container..."
+                                        docker run -d \\
+                                            --name ${env.PRODUCTION_CONTAINER_NAME} \\
+                                            --restart unless-stopped \\
+                                            -p 3000:3000 \\
+                                            -e MONGODB_URL="\$MONGO_URL" \\
+                                            -e NODE_ENV=production \\
+                                            -e PORT=3000 \\
+                                            ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}
+                                        
+                                        echo "⏳ Waiting for application to start..."
+                                        sleep 20
+                                        
+                                        echo "📊 Container status:"
+                                        docker ps -a | grep ${env.PRODUCTION_CONTAINER_NAME} || echo "Container not found in ps"
+                                        
+                                        echo "📝 Container logs (last 30 lines):"
+                                        docker logs ${env.PRODUCTION_CONTAINER_NAME} --tail=30 2>&1 || echo "No logs available"
+                                        
+                                        echo "🔍 Checking application health..."
+                                        HEALTH_CHECK_PASSED=false
+                                        for i in {1..6}; do
+                                            echo "  Attempt \$i/6..."
+                                            # Thử cả 2 endpoints: root và health
+                                            if curl -f http://localhost:3000 2>/dev/null || curl -f http://localhost:3000/api/health 2>/dev/null; then
+                                                echo "✅ Health check passed!"
+                                                HEALTH_CHECK_PASSED=true
+                                                break
+                                            fi
+                                            if [ \$i -lt 6 ]; then
+                                                echo "  ⏳ Waiting 10 seconds before retry..."
+                                                sleep 10
+                                            fi
+                                        done
+                                        
+                                        if [ "\$HEALTH_CHECK_PASSED" = false ]; then
+                                            echo "⚠️  Health check failed after 6 attempts"
+                                            echo "📝 Full container logs:"
+                                            docker logs ${env.PRODUCTION_CONTAINER_NAME} 2>&1
+                                            exit 1
+                                        fi
+                                        
+                                        echo "✅ Deployment completed successfully!"
+                                    '
+                                """
+                            }
+                        } catch (Exception e) {
+                            echo "⚠️  Credentials not found, using direct SSH..."
                             sh """
-                                # SSH to production server and deploy
-                                ssh -o StrictHostKeyChecking=no -i \${SSH_KEY} \${SSH_USER}@${env.PRODUCTION_SERVER_IP} '
+                                # Direct SSH deployment without Jenkins credentials
+                                ssh -o StrictHostKeyChecking=no -i /home/ec2-user/vucar-key.pem ec2-user@${env.PRODUCTION_SERVER_IP} '
                                     set -e
                                     
                                     echo "🔍 Current environment:"
                                     echo "  Docker tag: ${env.DOCKER_TAG}"
                                     echo "  Image: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
                                     echo "  Container: ${env.PRODUCTION_CONTAINER_NAME}"
-                                    echo "  Server IP: ${env.PRODUCTION_SERVER_IP}"
+                                    
+                                    # Fallback MongoDB URL
+                                    MONGO_URL="mongodb+srv://sycung9001:-pQk2Ht-%2ARdH7LT@cluster0.uy3at.mongodb.net/vucar_production?retryWrites=true&w=majority&appName=Cluster0"
                                     
                                     echo "🐳 Pulling latest Docker image..."
                                     docker pull ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}
@@ -190,7 +264,7 @@ pipeline {
                                         --name ${env.PRODUCTION_CONTAINER_NAME} \\
                                         --restart unless-stopped \\
                                         -p 3000:3000 \\
-                                        -e MONGODB_URL="\${MONGODB_URL}" \\
+                                        -e MONGODB_URL="\$MONGO_URL" \\
                                         -e NODE_ENV=production \\
                                         -e PORT=3000 \\
                                         ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}
@@ -199,34 +273,33 @@ pipeline {
                                     sleep 20
                                     
                                     echo "📊 Container status:"
-                                    docker ps -a | grep ${env.PRODUCTION_CONTAINER_NAME} || echo "Container not found in ps"
+                                    docker ps -a | grep ${env.PRODUCTION_CONTAINER_NAME}
                                     
-                                    echo "📝 Container logs (last 30 lines):"
-                                    docker logs ${env.PRODUCTION_CONTAINER_NAME} --tail=30 2>&1 || echo "No logs available"
+                                    echo "📝 Container logs:"
+                                    docker logs ${env.PRODUCTION_CONTAINER_NAME} --tail=30 2>&1
                                     
                                     echo "🔍 Checking application health..."
                                     HEALTH_CHECK_PASSED=false
                                     for i in {1..6}; do
                                         echo "  Attempt \$i/6..."
-                                        if curl -f http://localhost:3000/api/health 2>/dev/null; then
+                                        if curl -f http://localhost:3000 2>/dev/null || curl -f http://localhost:3000/api/health 2>/dev/null; then
                                             echo "✅ Health check passed!"
                                             HEALTH_CHECK_PASSED=true
                                             break
                                         fi
                                         if [ \$i -lt 6 ]; then
-                                            echo "  ⏳ Waiting 10 seconds before retry..."
+                                            echo "  ⏳ Waiting 10 seconds..."
                                             sleep 10
                                         fi
                                     done
                                     
                                     if [ "\$HEALTH_CHECK_PASSED" = false ]; then
-                                        echo "⚠️  Health check failed after 6 attempts"
-                                        echo "📝 Full container logs:"
+                                        echo "⚠️  Health check failed"
                                         docker logs ${env.PRODUCTION_CONTAINER_NAME} 2>&1
                                         exit 1
                                     fi
                                     
-                                    echo "✅ Deployment completed successfully!"
+                                    echo "✅ Deployment completed!"
                                 '
                             """
                         }

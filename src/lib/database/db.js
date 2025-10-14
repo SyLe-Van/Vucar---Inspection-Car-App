@@ -1,13 +1,8 @@
 import mongoose from "mongoose";
 import { appConfig } from "@/config/app";
 
-const MONGODB_URI = appConfig.database.url;
-
-if (!MONGODB_URI) {
-  throw new Error(
-    "Please define the MONGODB_URI environment variable inside .env.local"
-  );
-}
+// Đọc biến môi trường động mỗi lần gọi
+const getMongoUrl = () => appConfig.database.url;
 
 let cached;
 if (typeof window === "undefined") {
@@ -30,7 +25,14 @@ async function dbConnect() {
       serverSelectionTimeoutMS: 30000,
     };
 
-    cached.promise = mongoose.connect(MONGODB_URI, opts).then(mongoose => {
+    const MONGODB_URL = getMongoUrl();
+    if (!MONGODB_URL) {
+      throw new Error(
+        "Please define the MONGODB_URL environment variable inside .env.local"
+      );
+    }
+
+    cached.promise = mongoose.connect(MONGODB_URL, opts).then(mongoose => {
       return mongoose;
     });
   }

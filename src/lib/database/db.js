@@ -1,14 +1,6 @@
 import mongoose from "mongoose";
 import { appConfig } from "@/config/app";
 
-const MONGODB_URL = appConfig.database.url;
-
-if (!MONGODB_URL) {
-  throw new Error(
-    "Please define the MONGODB_URL environment variable inside .env.local"
-  );
-}
-
 let cached;
 if (typeof window === "undefined") {
   cached = globalThis.mongoose;
@@ -21,6 +13,15 @@ if (!cached) {
 async function dbConnect() {
   if (cached.conn) {
     return cached.conn;
+  }
+
+  // Read MONGODB_URL dynamically at connection time, not module load time
+  const MONGODB_URL = appConfig.database.url;
+
+  if (!MONGODB_URL) {
+    throw new Error(
+      "Please define the MONGODB_URL environment variable inside .env.local"
+    );
   }
 
   if (!cached.promise) {

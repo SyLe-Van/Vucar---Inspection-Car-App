@@ -264,8 +264,7 @@ pipeline {
                                         echo "🚀 Starting new container..."
                                         
                                         # Debug: Show MongoDB connection (hide password)
-                                        MONGO_DEBUG=\$(echo "\$MONGO_URL" | sed 's|://[^:]*:[^@]*@|://***:***@|')
-                                        echo "📊 MongoDB: \$MONGO_DEBUG"
+                                        echo "📊 MongoDB: \${MONGO_URL%%@*}@***"
                                         
                                         docker run -d \\
                                             --name ${env.PRODUCTION_CONTAINER_NAME} \\

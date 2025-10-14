@@ -111,9 +111,9 @@
     display: flex;
     flex-direction: row;
     align-items: center;
-    gap: 0.1rem; // Giảm xuống 0.1rem - rất gần
-    flex: 0 1 auto; // Không chiếm hết không gian
-    max-width: fit-content; // Chỉ rộng vừa đủ
+    gap: 0.1rem; 
+    flex: 0 1 auto; 
+    max-width: fit-content; 
 }
 
 .license_plate {

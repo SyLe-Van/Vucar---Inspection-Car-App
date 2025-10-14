@@ -45,7 +45,7 @@ export const appConfig = {
 
   // Database configuration
   database: {
-    // Read MONGODB_URL dynamically at runtime (not cached at build time)
+    // Read MONGODB_URI dynamically at runtime (not cached at build time)
     get url() {
       const url = process.env.MONGODB_URI;
       console.log('🔍 [DB Config] Reading MONGODB_URI:', url ? url.substring(0, 20) + '...' : 'undefined');

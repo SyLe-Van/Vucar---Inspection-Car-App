@@ -160,22 +160,54 @@ EOF
         stage('🐳 Build Docker Image') {
             steps {
                 script {
-                    echo "🐳 Building Docker image"
-                    def image = docker.build("${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}")
-                    echo "✅ Docker image built successfully"
+                    echo "🐳 Building Docker image for AMD64 platform"
+                    
+                    // Build multi-platform image for AMD64 (production servers)
+                    sh """
+                        docker buildx create --use --name multiarch-builder || true
+                        docker buildx build \
+                            --platform linux/amd64 \
+                            -t ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG} \
+                            --load \
+                            --build-arg MONGODB_URL=mongodb://localhost:27017/vucar-build \
+                            --build-arg NODE_ENV=production \
+                            .
+                    """
+                    
+                    echo "✅ Docker image built successfully for AMD64"
+                }
+            }
+            post {
+                success {
+                    echo "✅ Docker image build completed"
+                }
+                failure {
+                    echo "❌ Docker image build failed"
                 }
             }
         }
         
-        stage(' Push Docker Image') {
+        stage('📤 Push Docker Image') {
             steps {
                 script {
-                    echo "📤 Pushing Docker image to registry"
+                    echo "📤 Pushing AMD64 Docker image to registry"
+                    
+                    // Push AMD64 image to Docker Hub
                     docker.withRegistry('https://index.docker.io/v1/', env.DOCKER_CREDENTIALS_ID) {
-                        def image = docker.image("${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}")
-                        image.push()
+                        sh """
+                            docker push ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}
+                        """
                     }
+                    
                     echo "✅ Docker image pushed successfully"
+                }
+            }
+            post {
+                success {
+                    echo "✅ Docker image push completed"
+                }
+                failure {
+                    echo "❌ Docker image push failed"
                 }
             }
         }

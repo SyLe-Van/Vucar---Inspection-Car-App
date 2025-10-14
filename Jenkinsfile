@@ -38,6 +38,24 @@ pipeline {
     }
     
     stages {
+        
+        stage('🔍 Branch Check') {
+            steps {
+                script {
+                    def branch = env.GIT_BRANCH ?: env.BRANCH_NAME ?: 'unknown'
+                    echo "Current branch: ${branch}"
+                    
+                    if (!branch.contains('main')) {
+                        echo "⏭️ Skipping pipeline - not main branch"
+                        currentBuild.result = 'ABORTED'
+                        error('Pipeline only runs on main branch')
+                    }
+                    
+                    echo "✅ Main branch detected - continuing pipeline"
+                }
+            }
+        }
+
         stage('🔍 Initialize') {
             steps {
                 script {

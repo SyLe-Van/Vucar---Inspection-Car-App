@@ -175,7 +175,50 @@ pipeline {
             }
         }
         
-        stage('🚀 Deploy to Production') {
+        stage('� Run Database Migration') {
+            when {
+                expression { 
+                    return params.DEPLOY_TO_PRODUCTION && env.BRANCH_NAME == 'main'
+                }
+            }
+            steps {
+                script {
+                    echo "🔄 Running database migration on production..."
+                    
+                    try {
+                        withCredentials([
+                            string(credentialsId: 'mongodb-uri-production', variable: 'MONGODB_URL')
+                        ]) {
+                            sh """
+                                # SSH to production server and run migration
+                                ssh -o StrictHostKeyChecking=no -i ~/.ssh/vucar-key.pem ec2-user@${env.PRODUCTION_SERVER_IP} '
+                                    set -e
+                                    
+                                    echo "� Running database migrations..."
+                                    
+                                    # Pull latest image
+                                    docker pull ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}
+                                    
+                                    # Run migration using Docker with auto-migrate script
+                                    docker run --rm \\
+                                        -e MONGODB_URI="\${MONGODB_URL}" \\
+                                        ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG} \\
+                                        /bin/bash /app/scripts/auto-migrate.sh "\${MONGODB_URL}"
+                                    
+                                    echo "✅ Migration completed successfully!"
+                                '
+                            """
+                        }
+                    } catch (Exception e) {
+                        echo "⚠️  Warning: Migration failed with error: ${e.message}"
+                        echo "⚠️  Continuing with deployment (migration might already be applied)"
+                        // Don't fail the pipeline, just log warning
+                    }
+                }
+            }
+        }
+        
+        stage('�🚀 Deploy to Production') {
             steps {
                 script {
                     if (params.DEPLOY_TO_PRODUCTION) {

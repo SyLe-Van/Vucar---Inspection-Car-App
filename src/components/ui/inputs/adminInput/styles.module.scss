@@ -1,25 +1,55 @@
-@import "../../../styles/base.scss";
+@import "../../../../styles/base.scss";
+
 .label {
-    border: 1px solid #cccccc8e;
+    border: 2px solid rgba($gray-300, 0.5);
+    border-radius: $radius-sm;
     display: flex;
     align-items: center;
-    height: 42px;
+    height: 50px;
     overflow: hidden;
     margin: 1rem 0;
-    &_title{
-        border-radius: 20px;
+    transition: all $transition-base;
+    background: $white;
+    
+    &:hover {
+        border-color: rgba($primary-color, 0.3);
+        box-shadow: $shadow-sm;
     }
+    
+    &:focus-within {
+        border-color: $primary-color;
+        box-shadow: 0 0 0 3px rgba($primary-color, 0.1);
+    }
+    
+    &_title {
+        border-radius: $radius-sm;
+    }
+    
     span {
         display: block;
-        background: $blue-color;
-        font-size: 15px;
+        background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
+        font-size: 14px;
         font-weight: 700;
-        color: #fff;
+        color: $white;
         display: grid;
         place-items: center;
-        padding: 0 10px;
-        width: 100px;
+        padding: 0 1rem;
+        min-width: 120px;
         height: 100%;
+        position: relative;
+        
+        &::after {
+            content: '';
+            position: absolute;
+            right: -10px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 10px 0 10px 10px;
+            border-color: transparent transparent transparent $primary-dark;
+        }
     }
  
     input,
@@ -30,29 +60,42 @@
         height: 100%;
         flex: 1;
         background: transparent;
-        color: #111 !important;
-        padding-left: 5px;
+        color: $gray-800 !important;
+        padding-left: 1.25rem;
+        font-size: 15px;
+        font-weight: 500;
 
         &::placeholder {
-            color: #666;
+            color: $gray-500;
         }
     }
 }
 
 .inputError {
+    border-color: #dc3545 !important;
+    
+    &:hover, &:focus-within {
+        border-color: #dc3545 !important;
+        box-shadow: 0 0 0 3px rgba(#dc3545, 0.1);
+    }
+    
     span {
-        background: $error-secondary-color !important;
+        background: linear-gradient(135deg, #dc3545 0%, #c82333 100%) !important;
+        
+        &::after {
+            border-color: transparent transparent transparent #c82333 !important;
+        }
     }
 
     input {
-        background: rgba(255, 0, 0, 0.031) !important;
-        border: px solid $error-secondary-color !important;
+        background: rgba(#dc3545, 0.03) !important;
     }
 
     &_msg {
-        color: $error-secondary-color;
-        font-size: 14px;
-        margin-left: 105px;
-        margin-top: -13px;
+        color: #dc3545;
+        font-size: 13px;
+        margin-left: 130px;
+        margin-top: -10px;
+        font-weight: 600;
     }
 } 

@@ -217,8 +217,15 @@ export default function CollapsibleTable({ car, criteries }) {
   return (
     <div className={styles.wrapper}>
       <div className={styles.header}>
-        <span>Car: {cars.name}</span>
-        <span>Status: {status}</span>
+        <div className={styles.header_car_info}>
+          <span className={styles.header_car_name}>{cars.name}</span>
+          {cars.licensePlate && (
+            <span className={styles.header_license_plate}>
+              {cars.licensePlate}
+            </span>
+          )}
+        </div>
+        <span>{status}</span>
       </div>
       <div className={styles.container}>
         <div className={styles.container_title}>
@@ -234,12 +241,28 @@ export default function CollapsibleTable({ car, criteries }) {
             <span>{criteria.name}</span>
             <span>{criteria.description}</span>
             <Checkbox
+              className={styles.customCheckbox}
               checked={selectedCriteria[index]?.notGood || false}
               onChange={handleCheckboxChange(index, "notGood")}
+              inputProps={{ "data-type": "notGood" }}
+              sx={{
+                color: "#f44336",
+                "&.Mui-checked": {
+                  color: "#f44336",
+                },
+              }}
             />
             <Checkbox
+              className={styles.customCheckbox}
               checked={selectedCriteria[index]?.good || false}
               onChange={handleCheckboxChange(index, "good")}
+              inputProps={{ "data-type": "good" }}
+              sx={{
+                color: "#4caf50",
+                "&.Mui-checked": {
+                  color: "#4caf50",
+                },
+              }}
             />
 
             {selectedCriteria[index]?.notGood && (

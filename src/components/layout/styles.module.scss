@@ -1,9 +1,25 @@
+@import "../../styles/base.scss";
+
 .layout {
     position: relative;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    min-height: 100vh;
 
     &_main {
-        padding: 1rem 2rem;
+        padding: 2rem 3rem;
         min-height: 100vh;
         padding-bottom: 5rem;
+        margin-left: 80px; // Sidebar width when collapsed
+        transition: margin-left $transition-base;
+        
+        @media (max-width: 768px) {
+            padding: 1rem;
+            margin-left: 0;
+        }
     }
+}
+
+// Add smooth transition for sidebar expansion
+.layout_main_expanded {
+    margin-left: 280px; // Sidebar width when expanded
 }

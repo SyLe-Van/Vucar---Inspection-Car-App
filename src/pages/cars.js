@@ -21,7 +21,7 @@ export async function getServerSideProps(context) {
   await dbConnect();
   const cars = await car
     .find({})
-    .select("name status slug")
+    .select("name licensePlate status slug")
     .sort({ createdAt: -1 })
     .lean();
   return {

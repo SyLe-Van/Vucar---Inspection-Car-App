@@ -1,52 +1,129 @@
 @import "../../../styles/base.scss";
 
 .table {
+    
     thead {
-        background: $blue-color;
+        background: linear-gradient(135deg, rgba($primary-color, 0.1) 0%, rgba($primary-dark, 0.1) 100%);
 
         th {
-            color: #fff !important;
+            color: $gray-800 !important;
+            font-weight: 600;
+            padding: 1rem 1.25rem !important;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.8px;
+            border-bottom: 2px solid rgba($primary-color, 0.2);
         }
     }
+    
+    tbody {
+        tr {
+            transition: all $transition-base;
+            border-bottom: none;
+
+            &:not(:last-child) {
+                border-bottom: 1px solid rgba($gray-200, 0.5);
+            }
+        }
+    }
+    
     td {
+        padding: 1rem 1.25rem !important;
+        border-bottom: none;
+        
         b {
             font-size: 15px;
+            color: $gray-800;
         }
 
         svg {
             width: 30px;
             height: 30px;
+            transition: transform $transition-base;
         }
     }
 }
-.head{
+
+.head {
     display: flex;
     justify-content: space-between;
-    background-color: #e3503e;
+    align-items: center;
+    background: linear-gradient(135deg, $primary-color 0%, $primary-dark 100%);
+    padding: 1rem 1.5rem;
+    border-radius: $radius-md;
+    box-shadow: $shadow-md;
+    margin-bottom: 1.5rem;
+    
+    h2 {
+        color: $white;
+        font-weight: 600;
+        margin: 0;
+    }
 }
+
 .ver {
     width: 32px;
     height: 32px;
+    transition: transform $transition-base;
+    
+    &:hover {
+        transform: rotate(360deg) scale(1.1);
+    }
 }
 
 .not_processed {
     color: #e3503e;
+    background: rgba(#e3503e, 0.1);
+    padding: 4px 12px;
+    border-radius: $radius-full;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    display: inline-block;
 }
 
 .processing {
     color: #54b7d3;
+    background: rgba(#54b7d3, 0.1);
+    padding: 4px 12px;
+    border-radius: $radius-full;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    display: inline-block;
 }
 
 .dispatched {
     color: #1e91cf;
+    background: rgba(#1e91cf, 0.1);
+    padding: 4px 12px;
+    border-radius: $radius-full;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    display: inline-block;
 }
 
 .cancelled {
-    color: #e3d4d4;
+    color: #9e9e9e;
+    background: rgba(#9e9e9e, 0.1);
+    padding: 4px 12px;
+    border-radius: $radius-full;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    display: inline-block;
 }
 
 .completed {
     color: #4cb64c;
+    background: rgba(#4cb64c, 0.1);
+    padding: 4px 12px;
+    border-radius: $radius-full;
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    display: inline-block;
 }
 
 .status_not_inspected {

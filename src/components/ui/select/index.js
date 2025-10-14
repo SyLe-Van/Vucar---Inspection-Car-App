@@ -18,7 +18,32 @@ const SelectHandler = ({ onChange, value, label = "Status", name }) => {
 
   return (
     <Box sx={{ width: "100%", position: "relative", zIndex: 1000 }}>
-      <FormControl sx={{ minWidth: 250, height: 56 }}>
+      <FormControl
+        sx={{
+          minWidth: 250,
+          height: 56,
+          "& .MuiOutlinedInput-root": {
+            borderRadius: "8px",
+            transition: "all 0.3s ease",
+            "&:hover": {
+              boxShadow: "0 2px 8px rgba(2, 154, 242, 0.15)",
+            },
+            "&.Mui-focused": {
+              boxShadow: "0 0 0 3px rgba(2, 154, 242, 0.1)",
+              "& .MuiOutlinedInput-notchedOutline": {
+                borderColor: "#029af2",
+                borderWidth: "2px",
+              },
+            },
+          },
+          "& .MuiInputLabel-root": {
+            "&.Mui-focused": {
+              color: "#029af2",
+              fontWeight: 600,
+            },
+          },
+        }}
+      >
         <InputLabel>{label}</InputLabel>
         <Select
           value={value !== undefined ? value : ""}
@@ -29,6 +54,28 @@ const SelectHandler = ({ onChange, value, label = "Status", name }) => {
             PaperProps: {
               style: {
                 zIndex: 1300,
+                borderRadius: "8px",
+                boxShadow: "0 4px 20px rgba(0, 0, 0, 0.15)",
+                marginTop: "8px",
+              },
+            },
+          }}
+          sx={{
+            "& .MuiMenuItem-root": {
+              transition: "all 0.2s ease",
+              "&:hover": {
+                background:
+                  "linear-gradient(135deg, rgba(2, 154, 242, 0.1) 0%, rgba(2, 117, 216, 0.1) 100%)",
+                transform: "translateX(4px)",
+              },
+              "&.Mui-selected": {
+                background: "linear-gradient(135deg, #029af2 0%, #0275d8 100%)",
+                color: "#fff",
+                fontWeight: 600,
+                "&:hover": {
+                  background:
+                    "linear-gradient(135deg, #0275d8 0%, #025aa5 100%)",
+                },
               },
             },
           }}
@@ -38,6 +85,10 @@ const SelectHandler = ({ onChange, value, label = "Status", name }) => {
               key={option.value}
               value={option.value}
               onClick={() => console.log("MenuItem clicked:", option.value)} // Debug log
+              sx={{
+                padding: "12px 16px",
+                fontSize: "15px",
+              }}
             >
               {option.label}
             </MenuItem>

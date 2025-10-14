@@ -1,14 +1,18 @@
 import axios from "axios";
 import { useState, useEffect, useRef } from "react";
 import { AiFillDelete, AiTwotoneEdit } from "react-icons/ai";
+import { MdSave, MdCancel } from "react-icons/md";
 import { toast } from "react-toastify";
 import styles from "./styles.module.scss";
-
-import { FaRegEye } from "react-icons/fa";
+import { FaRegEye, FaCar } from "react-icons/fa";
+import { IoCarSportSharp } from "react-icons/io5";
+import { FaTruckPickup, FaCarSide } from "react-icons/fa";
+import { RiCarFill } from "react-icons/ri";
 import { useRouter } from "next/router";
-import { Button } from "@mui/material";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchInspectionByCarId } from "@/store/carSlice";
+import ActionButton from "@/components/ui/ActionButton";
+
 export default function ListItem({ car, setCars }) {
   const dispatch = useDispatch();
   const router = useRouter();
@@ -80,54 +84,113 @@ export default function ListItem({ car, setCars }) {
     }
   };
 
+  const getCarIconAndColor = () => {
+    // Tạo hash từ car ID để chọn icon và màu sắc nhất quán
+    const hash = car._id
+      .split("")
+      .reduce((acc, char) => acc + char.charCodeAt(0), 0);
+    const iconIndex = hash % 5;
+    const colorIndex = hash % 8;
+
+    const icons = [FaCar, IoCarSportSharp, FaTruckPickup, FaCarSide, RiCarFill];
+
+    const colors = [
+      "#FF6B6B", // Đỏ
+      "#4ECDC4", // Xanh ngọc
+      "#FFD93D", // Vàng
+      "#A8E6CF", // Xanh mint
+      "#FF8C94", // Hồng
+      "#95E1D3", // Xanh biển nhạt
+      "#F38181", // Đỏ cam
+      "#AA96DA", // Tím
+    ];
+
+    const CarIcon = icons[iconIndex];
+    const color = colors[colorIndex];
+
+    return { CarIcon, color };
+  };
+
+  const { CarIcon, color: carColor } = getCarIconAndColor();
+
+  // Debug: Log car data
+  console.log("Car data in ListItem:", {
+    id: car._id,
+    name: car.name,
+    licensePlate: car.licensePlate,
+    status: car.status,
+  });
+
   return (
     <li className={styles.list_item}>
-      <input
-        className={open ? styles.open : ""}
-        type="text"
-        value={name ? name : car.name}
-        onChange={e => setName(e.target.value)}
-        disabled={!open}
-        ref={input}
-      />
+      <div className={styles.car_name_container}>
+        <CarIcon className={styles.car_icon} style={{ color: carColor }} />
+        <div className={styles.car_info}>
+          <input
+            className={open ? styles.open : ""}
+            type="text"
+            value={name ? name : car.name}
+            onChange={e => setName(e.target.value)}
+            disabled={!open}
+            ref={input}
+          />
+          {!open && car.licensePlate && (
+            <span className={styles.license_plate}>{car.licensePlate}</span>
+          )}
+        </div>
+      </div>
       <span className={`${styles.status} ${getStatusClass(car.status)}`}>
         {getStatusText(car.status)}
       </span>
 
       {open && (
         <div className={styles.list_item_expand}>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
+          <ActionButton
+            icon={MdSave}
+            tooltip="Save changes"
             onClick={() => handleUpdate(car._id)}
-          >
-            Save
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
+            variant="save"
+            size={22}
+          />
+          <ActionButton
+            icon={MdCancel}
+            tooltip="Cancel editing"
             onClick={() => {
               setOpen(false);
               setName("");
             }}
-          >
-            Cancel
-          </Button>
+            variant="cancel"
+            size={22}
+          />
         </div>
       )}
       <div className={styles.list_item_actions}>
-        <FaRegEye onClick={handleClick} />
+        <ActionButton
+          icon={FaRegEye}
+          tooltip="View details"
+          onClick={handleClick}
+          variant="default"
+          size={22}
+        />
         {!open && (
-          <AiTwotoneEdit
+          <ActionButton
+            icon={AiTwotoneEdit}
+            tooltip="Edit car"
             onClick={() => {
               setOpen(prev => !prev);
               input.current.focus();
             }}
+            variant="default"
+            size={22}
           />
         )}
-        <AiFillDelete onClick={() => handleRemove(car._id)} />
+        <ActionButton
+          icon={AiFillDelete}
+          tooltip="Delete car"
+          onClick={() => handleRemove(car._id)}
+          variant="delete"
+          size={22}
+        />
       </div>
     </li>
   );

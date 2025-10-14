@@ -8,7 +8,7 @@ export default function InspectionPage({ inspection }) {
   return (
     <Layout>
       <Head>
-        <title>Vucar-Inspection Car</title>
+        <title>Vucar - Car Inspection App</title>
       </Head>
       <InspectionSummary rows={inspection} />
     </Layout>
@@ -37,6 +37,7 @@ export async function getServerSideProps(ctx) {
           car: {
             _id: car._id,
             name: car.name,
+            licensePlate: car.licensePlate,
           },
           status: car.status,
           criteries: inspection.criteries,
@@ -49,6 +50,7 @@ export async function getServerSideProps(ctx) {
           car: {
             _id: car._id,
             name: car.name,
+            licensePlate: car.licensePlate,
           },
           status: car.status,
           criteries: [],

@@ -2,15 +2,17 @@ import axios from "axios";
 import { useRef } from "react";
 import { useState } from "react";
 import { AiFillDelete, AiTwotoneEdit } from "react-icons/ai";
+import { MdSave, MdCancel } from "react-icons/md";
 import { toast } from "react-toastify";
 import styles from "./styles.module.scss";
-import { Button } from "@mui/material";
+import ActionButton from "@/components/ui/ActionButton";
+
 export default function ListItem({ criteries, setCriteries }) {
   const [open, setOpen] = useState(false);
   const [name, setName] = useState("");
   const [description, setDescription] = useState("");
   const input = useRef(null);
-  const handleRemove = async (id) => {
+  const handleRemove = async id => {
     try {
       const { data } = await axios.delete("/api/v1/criteria", {
         data: { id },
@@ -21,7 +23,7 @@ export default function ListItem({ criteries, setCriteries }) {
       toast.error(error.response.data.message);
     }
   };
-  const handleUpdate = async (id) => {
+  const handleUpdate = async id => {
     try {
       const { data } = await axios.put("/api/v1/criteria", {
         id,
@@ -41,43 +43,51 @@ export default function ListItem({ criteries, setCriteries }) {
         className={open ? styles.open : ""}
         type="text"
         value={name ? name : criteries.name}
-        onChange={(e) => setName(e.target.value)}
+        onChange={e => setName(e.target.value)}
         disabled={!open}
         ref={input}
       />
       {open && (
         <div className={styles.list_item_expand}>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
+          <ActionButton
+            icon={MdSave}
+            tooltip="Save changes"
             onClick={() => handleUpdate(criteries._id)}
-          >
-            Save
-          </Button>
-          <Button
-            type="submit"
-            variant="contained"
-            color="primary"
+            variant="save"
+            size={22}
+          />
+          <ActionButton
+            icon={MdCancel}
+            tooltip="Cancel editing"
             onClick={() => {
               setOpen(false);
               setName("");
             }}
-          >
-            Cancel
-          </Button>
+            variant="cancel"
+            size={22}
+          />
         </div>
       )}
       <div className={styles.list_item_actions}>
         {!open && (
-          <AiTwotoneEdit
+          <ActionButton
+            icon={AiTwotoneEdit}
+            tooltip="Edit criteria"
             onClick={() => {
-              setOpen((prev) => !prev);
+              setOpen(prev => !prev);
               input.current.focus();
             }}
+            variant="default"
+            size={22}
           />
         )}
-        <AiFillDelete onClick={() => handleRemove(criteries._id)} />
+        <ActionButton
+          icon={AiFillDelete}
+          tooltip="Delete criteria"
+          onClick={() => handleRemove(criteries._id)}
+          variant="delete"
+          size={22}
+        />
       </div>
     </li>
   );

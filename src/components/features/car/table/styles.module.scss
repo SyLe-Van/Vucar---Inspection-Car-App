@@ -57,11 +57,93 @@
 }
 .header{
     display: flex;
-    align-content: flex-start;
-    margin-left: 20px;
-    font-weight: bold;
-    gap: 4rem;
-    font-size: 20px;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1.5rem 2rem;
+    background: linear-gradient(135deg, #029af2 0%, #0275d8 100%);
+    border-radius: 12px;
+    margin-bottom: 1.5rem;
+    box-shadow: 0 4px 15px rgba(2, 154, 242, 0.2);
+    
+    &_car_info {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        gap: 1rem;
+        color: white;
+    }
+    
+    &_car_name {
+        font-size: 22px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        
+        &::before {
+            content: "🚗";
+            font-size: 24px;
+        }
+    }
+    
+    &_license_plate {
+        font-size: 14px;
+        font-weight: 600;
+        color: rgba(255, 255, 255, 0.9);
+        background: rgba(255, 255, 255, 0.2);
+        padding: 0.375rem 0.875rem;
+        border-radius: 6px;
+        white-space: nowrap;
+        letter-spacing: 1px;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        transition: all 0.2s ease;
+        
+        &:hover {
+            background: rgba(255, 255, 255, 0.25);
+            border-color: rgba(255, 255, 255, 0.5);
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+        }
+    }
+    
+    span {
+        color: white;
+        font-weight: 600;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        
+        &:last-child {
+            // Status style
+            padding: 0.5rem 1.5rem;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            font-size: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            
+            &::before {
+                content: "📋";
+                margin-right: 0.5rem;
+            }
+        }
+    }
+    
+    // Responsive
+    @media (max-width: 768px) {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 1rem;
+        
+        span:last-child {
+            width: 100%;
+            text-align: center;
+            justify-content: center;
+        }
+    }
 }
 .button{
     display: flex;
@@ -72,4 +154,64 @@
 }
 .wrapper{
     margin-top: 20px;
+}
+
+// Custom checkbox styles with beautiful hover effects
+.customCheckbox {
+    :global {
+        .MuiCheckbox-root {
+            padding: 8px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 8px;
+            
+            &:hover {
+                background-color: rgba(2, 154, 242, 0.08);
+                transform: scale(1.1);
+            }
+
+            // Not checked state
+            .MuiSvgIcon-root {
+                font-size: 28px;
+                transition: all 0.3s ease;
+            }
+
+            // Checked state - Good (green theme)
+            &.Mui-checked {
+                &[data-type="good"] {
+                    color: #4caf50;
+                    
+                    &:hover {
+                        background-color: rgba(76, 175, 80, 0.12);
+                        box-shadow: 0 0 12px rgba(76, 175, 80, 0.3);
+                    }
+                }
+
+                // Checked state - Not Good (red theme)
+                &[data-type="notGood"] {
+                    color: #f44336;
+                    
+                    &:hover {
+                        background-color: rgba(244, 67, 54, 0.12);
+                        box-shadow: 0 0 12px rgba(244, 67, 54, 0.3);
+                    }
+                }
+            }
+
+            // Unchecked hover state
+            &:not(.Mui-checked) {
+                &:hover {
+                    .MuiSvgIcon-root {
+                        color: #029af2;
+                        filter: drop-shadow(0 0 4px rgba(2, 154, 242, 0.4));
+                    }
+                }
+            }
+
+            // Focus state for accessibility
+            &.Mui-focusVisible {
+                outline: 2px solid #029af2;
+                outline-offset: 2px;
+            }
+        }
+    }
 }

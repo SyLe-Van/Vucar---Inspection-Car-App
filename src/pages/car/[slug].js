@@ -21,6 +21,7 @@ export async function getServerSideProps(context) {
   const newCar = {
     _id: car._id,
     name: car.name,
+    licensePlate: car.licensePlate,
     status: car.status,
   };
   return {

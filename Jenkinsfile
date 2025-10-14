@@ -59,21 +59,28 @@ pipeline {
         stage('🔍 Initialize') {
             steps {
                 script {
+                    // Get branch name from Git
+                    def branch = env.GIT_BRANCH ?: env.BRANCH_NAME ?: 'unknown'
+                    // Remove 'origin/' prefix if present
+                    branch = branch.replaceAll(/^origin\//, '')
+                    env.BRANCH_NAME = branch
+                    
+                    echo "🌿 Detected branch: ${branch}"
+                    
                     // Set Docker tag based on branch
-                    if (env.BRANCH_NAME == 'main') {
+                    if (branch == 'main') {
                         env.DOCKER_TAG = "v1.0.${env.BUILD_NUMBER}"
                         echo "🚀 PRODUCTION Pipeline"
                         echo "📁 Environment: .env.production"
                         echo "🐳 Docker tag: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
                         echo "🎯 Mode: Full CI/CD with Deploy Option"
                     } else {
-                        env.DOCKER_TAG = "${env.BRANCH_NAME}-${env.BUILD_NUMBER}"
+                        env.DOCKER_TAG = "${branch}-${env.BUILD_NUMBER}"
                         echo "🔧 DEVELOPMENT Pipeline"
                         echo "📁 Environment: .env.local"
                         echo "🐳 Docker tag: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
                         echo "🎯 Mode: CI/CD Testing (No Deployment)"
                     }
-                    echo "🌿 Branch: ${env.BRANCH_NAME}"
                     echo "📦 Deploy to Production: ${params.DEPLOY_TO_PRODUCTION}"
                 }
             }

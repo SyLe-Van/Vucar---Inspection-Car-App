@@ -26,11 +26,10 @@ RUN npm ci --ignore-scripts && npm cache clean --force
 COPY . .
 
 # Accept build arguments from system environment
-ARG MONGODB_URL=mongodb://localhost:27017/vucar-build
 ARG NODE_ENV=production
 
 # Set environment variables for build process
-ENV MONGODB_URL=$MONGODB_URL
+# MONGODB_URL is NOT set in build - will be provided at runtime
 ENV NODE_ENV=$NODE_ENV
 
 # Ensure Next is configured to output standalone server (next.config.js: output: 'standalone')

@@ -13,11 +13,11 @@ export default function CollapsibleTable({ car, criteries }) {
   const router = useRouter();
   const dispatch = useDispatch();
   const [cars, setCars] = useState(car);
-  const [criteriess, setCriteriess] = useState(criteries);
   const [selectedCount, setSelectedCount] = useState(0);
-  const [status, setStatus] = useState("Not inspected");
+  // Sử dụng status từ car object thay vì tính toán lại
+  const [status, setStatus] = useState(getStatusText(car.status));
   const [selectedCriteria, setSelectedCriteria] = useState(
-    criteriess.map(() => ({
+    criteries.map(() => ({
       good: false,
       notGood: false,
       note: "",
@@ -26,7 +26,7 @@ export default function CollapsibleTable({ car, criteries }) {
 
   const inspection = useSelector(state => state.car.inspection);
 
-  const getStatusText = status => {
+  function getStatusText(status) {
     switch (status) {
       case 0:
         return "Not inspected";
@@ -37,22 +37,59 @@ export default function CollapsibleTable({ car, criteries }) {
       default:
         return "Unknown";
     }
-  };
+  }
 
+  // Merge inspection data với tất cả criteries
   useEffect(() => {
-    if (inspection && inspection.car === cars._id) {
-      setStatus(getStatusText(inspection.status));
-      setCriteriess(inspection.criteries);
-      setSelectedCriteria(
-        inspection.criteries.map(criteria => ({
-          good: criteria.is_good,
-          notGood: !criteria.is_good && criteria.note !== "",
-          note: criteria.note || "",
-        }))
-      );
-    }
-  }, [inspection, cars._id]);
+    if (inspection && String(inspection.car) === String(cars._id)) {
+      // Cập nhật status từ car object, không từ inspection
+      setStatus(getStatusText(cars.status));
 
+      console.log("Merging inspection data with criteries...");
+      console.log("Inspection criteries:", inspection.criteries);
+      console.log("All criteries:", criteries);
+
+      // Map qua TẤT CẢ criteries và merge với inspection data nếu có
+      const mergedCriteria = criteries.map(criteria => {
+        // Tìm criteria tương ứng trong inspection (so sánh cả _id và name)
+        const inspectedCriteria = inspection.criteries.find(
+          ic =>
+            String(ic.criteria_id) === String(criteria._id) ||
+            ic.criteria_name === criteria.name
+        );
+
+        if (inspectedCriteria) {
+          // Nếu đã được đánh giá, lấy dữ liệu từ inspection
+          console.log(
+            `Found inspected criteria: ${criteria.name}`,
+            inspectedCriteria
+          );
+          return {
+            good: inspectedCriteria.is_good,
+            notGood:
+              !inspectedCriteria.is_good && inspectedCriteria.note !== "",
+            note: inspectedCriteria.note || "",
+          };
+        } else {
+          // Nếu chưa đánh giá, để trống
+          console.log(`Criteria not yet inspected: ${criteria.name}`);
+          return {
+            good: false,
+            notGood: false,
+            note: "",
+          };
+        }
+      });
+
+      console.log("Merged criteria:", mergedCriteria);
+      setSelectedCriteria(mergedCriteria);
+    } else {
+      // Nếu không có inspection, dùng status từ car
+      setStatus(getStatusText(cars.status));
+    }
+  }, [inspection, cars._id, cars.status, criteries]);
+
+  // Chỉ đếm số criteria đã được đánh giá, không tự động thay đổi status
   useEffect(() => {
     const count = selectedCriteria.reduce(
       (acc, curr) => acc + (curr.good || curr.notGood ? 1 : 0),
@@ -100,27 +137,68 @@ export default function CollapsibleTable({ car, criteries }) {
     );
   };
   const handleSave = async () => {
-    const passedCriteriaCount = selectedCriteria.filter(
-      item => item.good
+    // Đếm số criteria đã được đánh giá (good hoặc notGood được chọn)
+    const evaluatedCount = selectedCriteria.filter(
+      item => item.good || item.notGood
     ).length;
-    const carStatus =
-      passedCriteriaCount === 5 ? 2 : passedCriteriaCount > 0 ? 1 : 0;
-    setStatus(carStatus);
+
+    // Tổng số criteria
+    const totalCriteria = criteries.length;
+
+    // Kiểm tra có ít nhất 1 criteria được đánh giá
+    if (evaluatedCount === 0) {
+      toast.error("Please evaluate at least one criterion before saving.");
+      return;
+    }
+
+    // Logic status:
+    // - Inspected (2): Tất cả criteria đã được đánh giá
+    // - Inspecting (1): Một số criteria đã được đánh giá nhưng chưa đầy đủ
+    // - Not inspected (0): Chưa có criteria nào được đánh giá
+    let carStatus = 0;
+    if (evaluatedCount === totalCriteria && totalCriteria > 0) {
+      carStatus = 2; // Inspected - đã đánh giá đầy đủ
+    } else if (evaluatedCount > 0) {
+      carStatus = 1; // Inspecting - đang đánh giá
+    } else {
+      carStatus = 0; // Not inspected - chưa đánh giá
+    }
+
+    console.log(
+      `Status calculation: ${evaluatedCount}/${totalCriteria} criteria evaluated -> status: ${carStatus}`
+    );
+
+    setStatus(getStatusText(carStatus));
+
+    // Chỉ gửi những criteria đã được đánh giá (good hoặc notGood = true)
+    const evaluatedCriteria = criteries
+      .map((criteria, index) => {
+        const item = selectedCriteria[index];
+        // Chỉ lấy criteria đã được đánh giá
+        if (item && (item.good || item.notGood)) {
+          const isGood = item.good;
+          const result = {
+            criteria_id: criteria._id,
+            criteria_name: criteria.name,
+            is_good: isGood,
+          };
+          // Nếu not good, phải có note (nếu không có thì dùng giá trị mặc định)
+          if (!isGood) {
+            result.note =
+              item.note && item.note.trim() !== ""
+                ? item.note
+                : "No note provided";
+          }
+          return result;
+        }
+        return null;
+      })
+      .filter(item => item !== null); // Loại bỏ các null
+
     const inspectionData = {
       car_id: cars._id,
       status: carStatus,
-      criteries: criteriess.map((criteria, index) => {
-        const isGood = selectedCriteria[index].good;
-        const result = {
-          criteria_id: criteria._id,
-          criteria_name: criteria.name,
-          is_good: isGood,
-        };
-        if (!isGood) {
-          result.note = selectedCriteria[index].note;
-        }
-        return result;
-      }),
+      criteries: evaluatedCriteria,
     };
 
     try {
@@ -150,25 +228,25 @@ export default function CollapsibleTable({ car, criteries }) {
           <span>Not good</span>
           <span>Good</span>
         </div>
-        {criteriess.map((criteria, index) => (
+        {criteries.map((criteria, index) => (
           <div key={index} className={styles.container_item}>
             <span>{index + 1}</span>
             <span>{criteria.name}</span>
             <span>{criteria.description}</span>
             <Checkbox
-              checked={selectedCriteria[index].notGood}
+              checked={selectedCriteria[index]?.notGood || false}
               onChange={handleCheckboxChange(index, "notGood")}
             />
             <Checkbox
-              checked={selectedCriteria[index].good}
+              checked={selectedCriteria[index]?.good || false}
               onChange={handleCheckboxChange(index, "good")}
             />
 
-            {selectedCriteria[index].notGood && (
+            {selectedCriteria[index]?.notGood && (
               <TextField
                 label="Note"
                 variant="outlined"
-                value={selectedCriteria[index].note}
+                value={selectedCriteria[index]?.note || ""}
                 onChange={handleInputChange(index)}
                 className={styles.input}
                 sx={{ width: "1016px" }}

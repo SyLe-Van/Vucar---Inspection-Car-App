@@ -11,6 +11,7 @@
         display: flex;
         align-items: center;
         justify-content: space-between;
+        gap: 1rem;
        
         @media (max-width: 800px) {
             flex-direction: column;
@@ -31,6 +32,13 @@
             color: #fff;
             background: transparent;
             cursor: pointer;
+            flex: 1;
+        }
+
+        &_actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
         }
 
         &_expand {
@@ -77,4 +85,28 @@
 .list_item{
     border-radius: 10px;
     background-color: #029af2;
+}
+
+.status {
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    font-size: 14px;
+    font-weight: 600;
+    text-transform: capitalize;
+    white-space: nowrap;
+}
+
+.status_not_inspected {
+    background-color: #6c757d;
+    color: #fff;
+}
+
+.status_inspecting {
+    background-color: #ffc107;
+    color: #000;
+}
+
+.status_inspected {
+    background-color: #28a745;
+    color: #fff;
 }

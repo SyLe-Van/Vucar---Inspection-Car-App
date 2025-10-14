@@ -48,3 +48,30 @@
 .completed {
     color: #4cb64c;
 }
+
+.status_not_inspected {
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    background-color: #6c757d;
+    color: #fff;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status_inspecting {
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    background-color: #ffc107;
+    color: #000;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.status_inspected {
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    background-color: #28a745;
+    color: #fff;
+    font-weight: 600;
+    display: inline-block;
+}

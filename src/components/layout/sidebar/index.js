@@ -16,7 +16,7 @@ export default function Sidebar() {
   const route = router.pathname.split("/")[1];
   const { data: session } = useSession();
   const dispatch = useDispatch();
-  const { expandSidebar } = useSelector((state) => ({ ...state }));
+  const { expandSidebar } = useSelector(state => ({ ...state }));
   const expand = expandSidebar.expandSidebar;
   const handleExpand = () => {
     dispatch(toggleSidebar());
@@ -36,7 +36,7 @@ export default function Sidebar() {
       </div>
       <div className={styles.sidebar_container}>
         <div className={styles.sidebar_user}>
-          <Link href="/">
+          <Link href="/" className={styles.sidebar_user_link}>
             <Image
               src={"/images/logo.png"}
               alt=""
@@ -44,10 +44,10 @@ export default function Sidebar() {
               height={50}
               className={styles.sidebar_user_img}
             />
+            <div className={styles.show}>
+              <span className={styles.logo}>vucar</span>
+            </div>
           </Link>
-          <div className={styles.show}>
-            <span className={styles.logo}>vucar</span>
-          </div>
         </div>
         <div className={styles.sidebar_dropdown}>
           <ul className={styles.sidebar_list}>

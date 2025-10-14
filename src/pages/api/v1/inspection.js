@@ -12,6 +12,13 @@ router.post(async (req, res) => {
   try {
     const { car_id, status, criteries } = req.body;
 
+    console.log("=== INSPECTION API POST ===");
+    console.log("Received data:", {
+      car_id,
+      status,
+      criteriesCount: criteries?.length,
+    });
+
     await dbConnect();
     const existingCar = await Car.findById(car_id);
     if (!existingCar) {
@@ -29,13 +36,32 @@ router.post(async (req, res) => {
       }
     }
 
+    // Xóa inspection cũ của xe này (nếu có)
+    const deleteResult = await Inspection.deleteMany({ car: car_id });
+    console.log(
+      `Deleted ${deleteResult.deletedCount} old inspection(s) for car ${existingCar.name}`
+    );
+
+    // Tạo inspection mới
     const newInspection = new Inspection({
       car: car_id,
       criteries,
       status: status || 0,
     });
-    console.log("New Inspection", newInspection);
+    console.log("New Inspection data:", {
+      car: existingCar.name,
+      status: newInspection.status,
+      criteriesCount: criteries.length,
+    });
     await newInspection.save();
+
+    // Cập nhật status của Car
+    existingCar.status = status || 0;
+    await existingCar.save();
+    console.log(
+      `✅ Car "${existingCar.name}" status updated to: ${status} (${status === 2 ? "Inspected" : status === 1 ? "Inspecting" : "Not inspected"})`
+    );
+
     const inspections = await Inspection.find({}).sort({ createdAt: -1 });
 
     res.json({

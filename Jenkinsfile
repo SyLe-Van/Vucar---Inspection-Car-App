@@ -160,54 +160,22 @@ EOF
         stage('🐳 Build Docker Image') {
             steps {
                 script {
-                    echo "🐳 Building Docker image for AMD64 platform"
-                    
-                    // Build multi-platform image for AMD64 (production servers)
-                    sh """
-                        docker buildx create --use --name multiarch-builder || true
-                        docker buildx build \
-                            --platform linux/amd64 \
-                            -t ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG} \
-                            --load \
-                            --build-arg MONGODB_URL=mongodb://localhost:27017/vucar-build \
-                            --build-arg NODE_ENV=production \
-                            .
-                    """
-                    
-                    echo "✅ Docker image built successfully for AMD64"
-                }
-            }
-            post {
-                success {
-                    echo "✅ Docker image build completed"
-                }
-                failure {
-                    echo "❌ Docker image build failed"
+                    echo "🐳 Building Docker image"
+                    def image = docker.build("${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}")
+                    echo "✅ Docker image built successfully"
                 }
             }
         }
         
-        stage('📤 Push Docker Image') {
+        stage(' Push Docker Image') {
             steps {
                 script {
-                    echo "📤 Pushing AMD64 Docker image to registry"
-                    
-                    // Push AMD64 image to Docker Hub
+                    echo "📤 Pushing Docker image to registry"
                     docker.withRegistry('https://index.docker.io/v1/', env.DOCKER_CREDENTIALS_ID) {
-                        sh """
-                            docker push ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}
-                        """
+                        def image = docker.image("${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}")
+                        image.push()
                     }
-                    
                     echo "✅ Docker image pushed successfully"
-                }
-            }
-            post {
-                success {
-                    echo "✅ Docker image push completed"
-                }
-                failure {
-                    echo "❌ Docker image push failed"
                 }
             }
         }
@@ -225,43 +193,40 @@ EOF
                         string(credentialsId: 'mongodb-uri-production', variable: 'MONGODB_URL'),
                         sshUserPrivateKey(credentialsId: 'production-server-ssh', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER')
                     ]) {
-                        def dockerImageName = env.DOCKER_IMAGE_NAME
-                        def dockerTag = env.DOCKER_TAG
-                        
                         sh """
                             # SSH to production server and deploy
-                            ssh -o StrictHostKeyChecking=no -i \${SSH_KEY} \${SSH_USER}@3.0.19.202 << 'EOF'
-set -e
-echo "📦 Pulling latest code..."
-cd /opt/vucar-production
-git pull origin main
-
-echo "🐳 Pulling latest Docker image..."
-docker pull ${dockerImageName}:${dockerTag}
-
-echo "🔄 Stopping old container..."
-docker stop vucar-production || true
-docker rm vucar-production || true
-
-echo "🚀 Starting new container..."
-docker run -d \\
-    --name vucar-production \\
-    --restart unless-stopped \\
-    -p 3000:3000 \\
-    -e MONGODB_URL="\${MONGODB_URL}" \\
-    -e NODE_ENV=production \\
-    -e PORT=3000 \\
-    ${dockerImageName}:${dockerTag}
-
-echo "⏳ Waiting for application to start..."
-sleep 10
-
-echo "🔍 Checking application health..."
-curl -f http://localhost:3000/api/health || exit 1
-
-echo "✅ Deployment successful!"
-docker logs vucar-production --tail=20
-EOF
+                            ssh -o StrictHostKeyChecking=no -i \${SSH_KEY} \${SSH_USER}@3.0.19.202 '
+                                set -e
+                                echo "📦 Pulling latest code..."
+                                cd /opt/vucar-production
+                                git pull origin main
+                                
+                                echo "🐳 Pulling latest Docker image..."
+                                docker pull ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}
+                                
+                                echo "🔄 Stopping old container..."
+                                docker stop vucar-production || true
+                                docker rm vucar-production || true
+                                
+                                echo "🚀 Starting new container..."
+                                docker run -d \\
+                                    --name vucar-production \\
+                                    --restart unless-stopped \\
+                                    -p 3000:3000 \\
+                                    -e MONGODB_URL="${MONGODB_URL}" \\
+                                    -e NODE_ENV=production \\
+                                    -e PORT=3000 \\
+                                    ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}
+                                
+                                echo "⏳ Waiting for application to start..."
+                                sleep 10
+                                
+                                echo "🔍 Checking application health..."
+                                curl -f http://localhost:3000/api/health || exit 1
+                                
+                                echo "✅ Deployment successful!"
+                                docker logs vucar-production --tail=20
+                            '
                         """
                     }
                 }

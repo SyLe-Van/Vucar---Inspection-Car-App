@@ -38,11 +38,8 @@ export default function ListItem({ car, setCars }) {
         name,
       });
 
-      setCars(prevCars =>
-        prevCars.map(carItem =>
-          carItem._id === id ? { ...carItem, name: data.cars.name } : carItem
-        )
-      );
+      // Cập nhật car trong danh sách với thông tin đầy đủ từ API
+      setCars(data.cars);
 
       setOpen(false);
       toast.success(data.message);
@@ -57,6 +54,32 @@ export default function ListItem({ car, setCars }) {
     router.push(`/car/${car.slug}`);
   };
 
+  const getStatusText = status => {
+    switch (status) {
+      case 0:
+        return "Not inspected";
+      case 1:
+        return "Inspecting";
+      case 2:
+        return "Inspected";
+      default:
+        return "Unknown";
+    }
+  };
+
+  const getStatusClass = status => {
+    switch (status) {
+      case 0:
+        return styles.status_not_inspected;
+      case 1:
+        return styles.status_inspecting;
+      case 2:
+        return styles.status_inspected;
+      default:
+        return "";
+    }
+  };
+
   return (
     <li className={styles.list_item}>
       <input
@@ -67,6 +90,9 @@ export default function ListItem({ car, setCars }) {
         disabled={!open}
         ref={input}
       />
+      <span className={`${styles.status} ${getStatusClass(car.status)}`}>
+        {getStatusText(car.status)}
+      </span>
 
       {open && (
         <div className={styles.list_item_expand}>

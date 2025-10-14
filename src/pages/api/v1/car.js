@@ -57,7 +57,9 @@ router.put(async (req, res) => {
 router.get(async (req, res) => {
   try {
     await dbConnect();
-    const cars = await Car.find({}, "name", "status");
+    const cars = await Car.find({})
+      .select("name status slug")
+      .sort({ createdAt: -1 });
     res.status(200).json(cars);
   } catch (error) {
     res.status(500).json({ message: error.message });

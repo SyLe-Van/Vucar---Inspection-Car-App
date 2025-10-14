@@ -19,14 +19,48 @@ export async function getServerSideProps(ctx) {
   await dbConnect();
 
   try {
-    const inspection = await Inspection.find({})
-      .populate({ path: "car", model: Car, select: "name" })
-      .sort({ createdAt: -1 })
-      .lean();
+    const cars = await Car.find({}).sort({ updatedAt: -1 }).lean();
+
+    const inspections = await Inspection.find({}).lean();
+
+    const inspectionMap = {};
+    inspections.forEach(insp => {
+      inspectionMap[insp.car.toString()] = insp;
+    });
+
+    const carWithInspection = cars.map(car => {
+      const inspection = inspectionMap[car._id.toString()];
+
+      if (inspection) {
+        return {
+          _id: inspection._id,
+          car: {
+            _id: car._id,
+            name: car.name,
+          },
+          status: car.status,
+          criteries: inspection.criteries,
+          createdAt: inspection.createdAt,
+          updatedAt: inspection.updatedAt,
+        };
+      } else {
+        return {
+          _id: car._id,
+          car: {
+            _id: car._id,
+            name: car.name,
+          },
+          status: car.status,
+          criteries: [],
+          createdAt: car.createdAt,
+          updatedAt: car.updatedAt,
+        };
+      }
+    });
 
     return {
       props: {
-        inspection: JSON.parse(JSON.stringify(inspection)),
+        inspection: JSON.parse(JSON.stringify(carWithInspection)),
       },
     };
   } catch (error) {

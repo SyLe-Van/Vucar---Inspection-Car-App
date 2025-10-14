@@ -19,7 +19,11 @@ export default function Car({ cars }) {
 
 export async function getServerSideProps(context) {
   await dbConnect();
-  const cars = await car.find({}).sort({ updatedAt: -1 }).lean();
+  const cars = await car
+    .find({})
+    .select("name status slug")
+    .sort({ createdAt: -1 })
+    .lean();
   return {
     props: {
       cars: JSON.parse(JSON.stringify(cars)),

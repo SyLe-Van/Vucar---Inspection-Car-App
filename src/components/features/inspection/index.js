@@ -20,7 +20,7 @@ function Row(props) {
   const { row } = props;
   const [open, setOpen] = React.useState(false);
 
-  const getStatusText = (status) => {
+  const getStatusText = status => {
     switch (status) {
       case 0:
         return "Not inspected";
@@ -30,6 +30,19 @@ function Row(props) {
         return "Inspected";
       default:
         return "Unknown status";
+    }
+  };
+
+  const getStatusClass = status => {
+    switch (status) {
+      case 0:
+        return styles.status_not_inspected;
+      case 1:
+        return styles.status_inspecting;
+      case 2:
+        return styles.status_inspected;
+      default:
+        return "";
     }
   };
 
@@ -54,7 +67,9 @@ function Row(props) {
         </TableCell>
 
         <TableCell>
-          <span>{getStatusText(row.status)}</span>
+          <span className={getStatusClass(row.status)}>
+            {getStatusText(row.status)}
+          </span>
         </TableCell>
       </TableRow>
       <TableRow>
@@ -69,26 +84,40 @@ function Row(props) {
               >
                 Inspection criteria
               </Typography>
-              <Table size="small" aria-label="purchases">
-                <TableHead>
-                  <TableRow styles={styles.head}>
-                    <TableCell>No</TableCell>
-                    <TableCell>Name</TableCell>
-                    <TableCell>Not Good</TableCell>
-                    <TableCell>Good</TableCell>
-                  </TableRow>
-                </TableHead>
-                <TableBody>
-                  {row.criteries.map((criterion, index) => (
-                    <TableRow key={criterion.criteria_id}>
-                      <TableCell>{index + 1}</TableCell>{" "}
-                      <TableCell>{criterion.criteria_name}</TableCell>{" "}
-                      <TableCell>{!criterion.is_good ? " ✘" : ""}</TableCell>{" "}
-                      <TableCell>{criterion.is_good ? "✔" : ""}</TableCell>{" "}
+              {row.criteries && row.criteries.length > 0 ? (
+                <Table size="small" aria-label="purchases">
+                  <TableHead>
+                    <TableRow styles={styles.head}>
+                      <TableCell>No</TableCell>
+                      <TableCell>Name</TableCell>
+                      <TableCell align="center">Not Good</TableCell>
+                      <TableCell align="center">Good</TableCell>
                     </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+                  </TableHead>
+                  <TableBody>
+                    {row.criteries.map((criterion, index) => (
+                      <TableRow key={criterion.criteria_id || index}>
+                        <TableCell>{index + 1}</TableCell>
+                        <TableCell>{criterion.criteria_name}</TableCell>
+                        <TableCell align="center">
+                          {!criterion.is_good ? "✘" : ""}
+                        </TableCell>
+                        <TableCell align="center">
+                          {criterion.is_good ? "✔" : ""}
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ py: 2 }}
+                >
+                  This car has not been inspected yet.
+                </Typography>
+              )}
             </Box>
           </Collapse>
         </TableCell>
@@ -108,20 +137,30 @@ function Row(props) {
               >
                 Notes
               </Typography>
-              <Table size="small" aria-label="purchases">
-                <TableBody>
-                  {row.criteries
-                    .filter((c) => c.note) // Lọc những tiêu chí có trường note
-                    .map((c) => (
-                      <TableRow key={c._id}>
-                        <TableCell>
-                          <strong>{c.criteria_name}</strong> <br />
-                          {c.note}
-                        </TableCell>
-                      </TableRow>
-                    ))}
-                </TableBody>
-              </Table>
+              {row.criteries && row.criteries.length > 0 ? (
+                <Table size="small" aria-label="purchases">
+                  <TableBody>
+                    {row.criteries
+                      .filter(c => c.note) // Lọc những tiêu chí có trường note
+                      .map((c, index) => (
+                        <TableRow key={c._id || index}>
+                          <TableCell>
+                            <strong>{c.criteria_name}</strong> <br />
+                            {c.note}
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ py: 2 }}
+                >
+                  No notes available.
+                </Typography>
+              )}
             </Box>
           </Collapse>
         </TableCell>
@@ -168,7 +207,7 @@ export default function InspectionSummary({ rows }) {
           </TableRow>
         </TableHead>
         <TableBody>
-          {rows.map((row) => (
+          {rows.map(row => (
             <Row key={row.car.name + row.status} row={row} />
           ))}
         </TableBody>

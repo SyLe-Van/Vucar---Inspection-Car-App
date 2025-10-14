@@ -169,9 +169,6 @@ pipeline {
         }
         
         stage('🚀 Deploy to Production') {
-            when {
-                branch 'main'
-            }
             steps {
                 script {
                     if (params.DEPLOY_TO_PRODUCTION) {
@@ -184,7 +181,7 @@ pipeline {
                             ]) {
                                 sh """
                                     # SSH to production server and deploy
-                                    ssh -o StrictHostKeyChecking=no -i /home/ec2-user/vucar-key.pem ec2-user@${env.PRODUCTION_SERVER_IP} '
+                                    ssh -o StrictHostKeyChecking=no -i ~/.ssh/vucar-key.pem ec2-user@${env.PRODUCTION_SERVER_IP} '
                                         set -e
                                         
                                         echo "🔍 Current environment:"
@@ -256,7 +253,7 @@ pipeline {
                             echo "⚠️  Credentials not found, using direct SSH..."
                             sh """
                                 # Direct SSH deployment without Jenkins credentials
-                                ssh -o StrictHostKeyChecking=no -i /home/ec2-user/vucar-key.pem ec2-user@${env.PRODUCTION_SERVER_IP} '
+                                ssh -o StrictHostKeyChecking=no -i ~/.ssh/vucar-key.pem ec2-user@${env.PRODUCTION_SERVER_IP} '
                                     set -e
                                     
                                     echo "🔍 Current environment:"
@@ -345,20 +342,6 @@ pipeline {
             }
         }
         
-        stage('📊 Development Summary') {
-            when {
-                not { branch 'main' }
-            }
-            steps {
-                script {
-                    echo "📊 Development Build Summary"
-                    echo "  Branch: ${env.BRANCH_NAME}"
-                    echo "  Docker Image: ${env.DOCKER_IMAGE_NAME}:${env.DOCKER_TAG}"
-                    echo "  Build Number: ${env.BUILD_NUMBER}"
-                    echo "  Status: CI/CD Testing Only (No Deployment)"
-                }
-            }
-        }
     }
     
     post {

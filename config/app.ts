@@ -34,14 +34,22 @@ function validateEnvironment(): EnvironmentConfig {
 
 // Application configuration
 export const appConfig = {
-  // Environment configuration
-  env: validateEnvironment(),
+  // Environment configuration - using getter to read dynamically
+  get env(): EnvironmentConfig {
+    return {
+      NODE_ENV: (process.env.NODE_ENV as EnvironmentConfig["NODE_ENV"]) || "development",
+      MONGODB_URL: process.env.MONGODB_URL!,
+      PORT: parseInt(process.env.PORT || "3000", 10),
+    };
+  },
 
   // Database configuration
   database: {
     // Read MONGODB_URL dynamically at runtime (not cached at build time)
     get url() {
-      return process.env.MONGODB_URL!;
+      const url = process.env.MONGODB_URL;
+      console.log('🔍 [DB Config] Reading MONGODB_URL:', url ? url.substring(0, 20) + '...' : 'undefined');
+      return url!;
     },
     options: {
       useNewUrlParser: true,

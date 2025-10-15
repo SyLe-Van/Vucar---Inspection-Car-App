@@ -1,0 +1,58 @@
+# Prometheus Configuration for VucarApp Monitoring
+# This file configures Prometheus to scrape metrics from the VucarApp
+
+global:
+  scrape_interval: 15s # Scrape targets every 15 seconds
+  evaluation_interval: 15s # Evaluate rules every 15 seconds
+  external_labels:
+    monitor: "vucar-monitor"
+    environment: "development"
+
+# Alerting configuration (optional - for future use)
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets: []
+          # - 'alertmanager:9093'
+
+# Load rules once and periodically evaluate them
+rule_files:
+  # - "alert_rules.yml"
+
+# Scrape configurations
+scrape_configs:
+  # Prometheus self-monitoring
+  - job_name: "prometheus"
+    static_configs:
+      - targets: ["localhost:9090"]
+        labels:
+          service: "prometheus"
+
+  # VucarApp metrics
+  - job_name: "vucar-app"
+    scrape_interval: 10s # Scrape more frequently for app metrics
+    scrape_timeout: 5s
+    metrics_path: "/api/metrics" # Our custom metrics endpoint
+    static_configs:
+      - targets: ["host.docker.internal:3000"] # For Docker Desktop on Mac/Windows
+        # - targets: ['172.17.0.1:3000'] # For Docker on Linux
+        # - targets: ['localhost:3000'] # For local Prometheus (not in Docker)
+        labels:
+          service: "vucar-app"
+          instance: "main"
+          environment: "development"
+
+  # Node Exporter (optional - for system metrics)
+  # Uncomment if you want to monitor host system metrics
+  # - job_name: 'node-exporter'
+  #   static_configs:
+  #     - targets: ['node-exporter:9100']
+  #       labels:
+  #         service: 'node-exporter'
+# Remote write configuration (optional - for long-term storage)
+# remote_write:
+#   - url: "http://remote-storage:9009/api/prom/push"
+
+# Remote read configuration (optional)
+# remote_read:
+#   - url: "http://remote-storage:9009/api/prom/read"

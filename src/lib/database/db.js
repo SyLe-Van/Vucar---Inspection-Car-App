@@ -25,14 +25,14 @@ async function dbConnect() {
       serverSelectionTimeoutMS: 30000,
     };
 
-    const MONGODB_URL = getMongoUrl();
-    if (!MONGODB_URL) {
+    const mongoUrl = getMongoUrl();
+    if (!mongoUrl) {
       throw new Error(
-        "Please define the MONGODB_URL environment variable inside .env.local"
+        "Please define the MONGODB_URI (or legacy MONGODB_URL) environment variable in your environment"
       );
     }
 
-    cached.promise = mongoose.connect(MONGODB_URL, opts).then(mongoose => {
+    cached.promise = mongoose.connect(mongoUrl, opts).then(mongoose => {
       return mongoose;
     });
   }

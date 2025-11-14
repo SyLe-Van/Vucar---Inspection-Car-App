@@ -1,18 +1,11 @@
 import { Form, Formik } from "formik";
-import { useState } from "react";
 import styles from "./styles.module.scss";
 import * as Yup from "yup";
 import { toast } from "react-toastify";
 import axios from "axios";
-import dynamic from "next/dynamic";
 import { Button, TextField, Paper, Box, Typography } from "@mui/material";
 import { FaCar } from "react-icons/fa";
-import SimpleSelect from "@/components/ui/SimpleSelect";
 import StatusSelect from "@/components/ui/StatusSelect";
-
-const SelectHandler = dynamic(() => import("@/components/ui/select"), {
-  ssr: false,
-});
 
 export default function Create({ setCars }) {
   // Hàm format biển số xe tự động
@@ -57,7 +50,6 @@ export default function Create({ setCars }) {
 
   const submitHandler = async (values, { resetForm }) => {
     try {
-      console.log("Submitting values:", values); // Debug log
       const { data } = await axios.post("/api/v1/car", {
         name: values.name,
         licensePlate: values.licensePlate.toUpperCase().trim(),
@@ -71,7 +63,6 @@ export default function Create({ setCars }) {
         toast.error("Car creation failed.");
       }
     } catch (error) {
-      console.log("error", error);
       toast.error(error.response?.data?.message || "An error occurred!.");
     }
   };
@@ -206,12 +197,6 @@ export default function Create({ setCars }) {
                     name="status"
                     value={formik.values.status}
                     onChange={value => {
-                      console.log(
-                        "Create component - StatusSelect onChange called with:",
-                        value,
-                        "type:",
-                        typeof value
-                      );
                       formik.setFieldValue("status", value);
                     }}
                   />

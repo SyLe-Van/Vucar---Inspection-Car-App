@@ -9,12 +9,6 @@ const SimpleSelect = ({ value, onChange, label = "Status", name }) => {
   ];
 
   const handleChange = event => {
-    console.log(
-      "SimpleSelect onChange:",
-      event.target.value,
-      "type:",
-      typeof event.target.value
-    );
     if (onChange) {
       // Chuyển đổi về number vì Material-UI trả về string
       const numericValue = Number(event.target.value);
@@ -31,17 +25,6 @@ const SimpleSelect = ({ value, onChange, label = "Status", name }) => {
   } else if (value === 2 || value === "2") {
     normalizedValue = 2;
   }
-
-  console.log(
-    "SimpleSelect render - original value:",
-    value,
-    "type:",
-    typeof value,
-    "normalizedValue:",
-    normalizedValue,
-    "type:",
-    typeof normalizedValue
-  );
 
   return (
     <FormControl sx={{ minWidth: 250 }}>

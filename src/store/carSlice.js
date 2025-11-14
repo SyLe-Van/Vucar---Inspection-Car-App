@@ -1,7 +1,10 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axios from "axios";
 const initialState = {
-  carItems: [],
+  cars: [],
+  inspection: null,
+  loading: false,
+  error: null,
 };
 export const fetchInspectionByCarId = createAsyncThunk(
   "car/fetchInspectionByCarId",
@@ -22,13 +25,13 @@ export const carSlice = createSlice({
     setCars: (state, action) => {
       state.cars = action.payload;
     },
-    clearInspection: (state) => {
+    clearInspection: state => {
       state.inspection = null;
     },
   },
-  extraReducers: (builder) => {
+  extraReducers: builder => {
     builder
-      .addCase(fetchInspectionByCarId.pending, (state) => {
+      .addCase(fetchInspectionByCarId.pending, state => {
         state.loading = true;
         state.error = null;
       })

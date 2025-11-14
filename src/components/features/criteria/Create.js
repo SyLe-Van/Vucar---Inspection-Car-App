@@ -21,7 +21,6 @@ export default function Create({ setCriteries }) {
         name: values.name,
         description: values.description,
       });
-      console.log("dataSub", data);
       if (data.message && data.criteries) {
         setCriteries(data.criteries);
         resetForm();

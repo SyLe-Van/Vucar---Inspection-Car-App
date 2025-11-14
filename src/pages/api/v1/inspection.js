@@ -4,7 +4,6 @@ import dbConnect from "@/lib/database/db";
 import Criteria from "@/lib/database/Criteria";
 import Car from "@/lib/database/Car";
 import Inspection from "@/lib/database/Inspection";
-import slugify from "slugify";
 
 const router = createRouter();
 
@@ -12,12 +11,11 @@ router.post(async (req, res) => {
   try {
     const { car_id, status, criteries } = req.body;
 
-    console.log("=== INSPECTION API POST ===");
-    console.log("Received data:", {
-      car_id,
-      status,
-      criteriesCount: criteries?.length,
-    });
+    if (!Array.isArray(criteries) || criteries.length === 0) {
+      return res
+        .status(400)
+        .json({ message: "Criteries must be a non-empty array." });
+    }
 
     await dbConnect();
     const existingCar = await Car.findById(car_id);
@@ -38,9 +36,6 @@ router.post(async (req, res) => {
 
     // Xóa inspection cũ của xe này (nếu có)
     const deleteResult = await Inspection.deleteMany({ car: car_id });
-    console.log(
-      `Deleted ${deleteResult.deletedCount} old inspection(s) for car ${existingCar.name}`
-    );
 
     // Tạo inspection mới
     const newInspection = new Inspection({
@@ -48,19 +43,11 @@ router.post(async (req, res) => {
       criteries,
       status: status || 0,
     });
-    console.log("New Inspection data:", {
-      car: existingCar.name,
-      status: newInspection.status,
-      criteriesCount: criteries.length,
-    });
     await newInspection.save();
 
     // Cập nhật status của Car
     existingCar.status = status || 0;
     await existingCar.save();
-    console.log(
-      `✅ Car "${existingCar.name}" status updated to: ${status} (${status === 2 ? "Inspected" : status === 1 ? "Inspecting" : "Not inspected"})`
-    );
 
     const inspections = await Inspection.find({}).sort({ createdAt: -1 });
 
@@ -75,8 +62,6 @@ router.post(async (req, res) => {
 router.get(async (req, res) => {
   try {
     const { carId } = req.query;
-
-    console.log("Car ID", carId);
     await dbConnect();
     const inspection = await Inspection.findOne({ car: carId }).populate(
       "criteries.criteria_id"
@@ -101,6 +86,10 @@ router.delete(async (req, res) => {
     await dbConnect();
 
     const result = await Inspection.deleteMany({ car: car_id });
+
+    if (car_id) {
+      await Car.findByIdAndUpdate(car_id, { status: 0 });
+    }
 
     res.json({
       message: `Successfully deleted ${result.deletedCount} inspections.`,

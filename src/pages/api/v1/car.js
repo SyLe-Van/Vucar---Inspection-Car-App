@@ -78,9 +78,56 @@ router.put(async (req, res) => {
     const { id, name, licensePlate } = req.body;
     await dbConnect();
 
-    const updateData = { name };
-    if (licensePlate) {
-      updateData.licensePlate = licensePlate.toUpperCase().trim();
+    const existingCar = await Car.findById(id);
+    if (!existingCar) {
+      return res.status(404).json({ message: "Car not found." });
+    }
+
+    const updateData = {};
+
+    if (name && name.trim() !== existingCar.name) {
+      const trimmedName = name.trim();
+      const nameConflict = await Car.findOne({
+        name: trimmedName,
+        _id: { $ne: id },
+      });
+
+      if (nameConflict) {
+        return res.status(400).json({
+          message: "Car name already exists, try a different name",
+        });
+      }
+
+      updateData.name = trimmedName;
+      updateData.slug = slugify(trimmedName);
+    }
+
+    if (typeof licensePlate === "string" && licensePlate.trim() !== "") {
+      const normalizedPlate = licensePlate.toUpperCase().trim();
+
+      if (normalizedPlate !== existingCar.licensePlate) {
+        const plateConflict = await Car.findOne({
+          licensePlate: normalizedPlate,
+          _id: { $ne: id },
+        });
+
+        if (plateConflict) {
+          return res.status(400).json({
+            message: "License plate already exists",
+          });
+        }
+
+        updateData.licensePlate = normalizedPlate;
+      }
+    }
+
+    if (Object.keys(updateData).length === 0) {
+      return res.json({
+        message: "No changes detected for the car.",
+        cars: await Car.find({})
+          .select("name licensePlate status slug")
+          .sort({ createdAt: -1 }),
+      });
     }
 
     await Car.findByIdAndUpdate(id, updateData);

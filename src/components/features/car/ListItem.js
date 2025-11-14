@@ -52,8 +52,6 @@ export default function ListItem({ car, setCars }) {
     }
   };
   const handleClick = async () => {
-    console.log("Current car in ListItem: ", car.name);
-    console.log("Current car in ListItemID: ", car._id);
     await dispatch(fetchInspectionByCarId(car._id));
     router.push(`/car/${car.slug}`);
   };
@@ -112,14 +110,6 @@ export default function ListItem({ car, setCars }) {
   };
 
   const { CarIcon, color: carColor } = getCarIconAndColor();
-
-  // Debug: Log car data
-  console.log("Car data in ListItem:", {
-    id: car._id,
-    name: car.name,
-    licensePlate: car.licensePlate,
-    status: car.status,
-  });
 
   return (
     <li className={styles.list_item}>

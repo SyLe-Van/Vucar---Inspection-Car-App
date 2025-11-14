@@ -1,13 +1,11 @@
-import { useEffect } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 
 import Sidebar from "./sidebar";
 import styles from "./styles.module.scss";
 
 export default function Layout({ children }) {
-  const { expandSidebar } = useSelector((state) => ({ ...state }));
+  const { expandSidebar } = useSelector(state => ({ ...state }));
   const showSidebar = expandSidebar.expandSidebar;
-  const dispatch = useDispatch();
 
   return (
     <div className={styles.layout}>

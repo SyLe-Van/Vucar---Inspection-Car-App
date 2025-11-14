@@ -7,7 +7,6 @@ import axios from "axios";
 import { useRouter } from "next/router";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchInspectionByCarId } from "@/store/carSlice"; // Điều chỉnh đường dẫn
-import { set } from "mongoose";
 
 export default function CollapsibleTable({ car, criteries }) {
   const router = useRouter();
@@ -45,10 +44,6 @@ export default function CollapsibleTable({ car, criteries }) {
       // Cập nhật status từ car object, không từ inspection
       setStatus(getStatusText(cars.status));
 
-      console.log("Merging inspection data with criteries...");
-      console.log("Inspection criteries:", inspection.criteries);
-      console.log("All criteries:", criteries);
-
       // Map qua TẤT CẢ criteries và merge với inspection data nếu có
       const mergedCriteria = criteries.map(criteria => {
         // Tìm criteria tương ứng trong inspection (so sánh cả _id và name)
@@ -60,10 +55,6 @@ export default function CollapsibleTable({ car, criteries }) {
 
         if (inspectedCriteria) {
           // Nếu đã được đánh giá, lấy dữ liệu từ inspection
-          console.log(
-            `Found inspected criteria: ${criteria.name}`,
-            inspectedCriteria
-          );
           return {
             good: inspectedCriteria.is_good,
             notGood:
@@ -72,7 +63,6 @@ export default function CollapsibleTable({ car, criteries }) {
           };
         } else {
           // Nếu chưa đánh giá, để trống
-          console.log(`Criteria not yet inspected: ${criteria.name}`);
           return {
             good: false,
             notGood: false,
@@ -80,8 +70,6 @@ export default function CollapsibleTable({ car, criteries }) {
           };
         }
       });
-
-      console.log("Merged criteria:", mergedCriteria);
       setSelectedCriteria(mergedCriteria);
     } else {
       // Nếu không có inspection, dùng status từ car
@@ -163,10 +151,6 @@ export default function CollapsibleTable({ car, criteries }) {
     } else {
       carStatus = 0; // Not inspected - chưa đánh giá
     }
-
-    console.log(
-      `Status calculation: ${evaluatedCount}/${totalCriteria} criteria evaluated -> status: ${carStatus}`
-    );
 
     setStatus(getStatusText(carStatus));
 

@@ -19,10 +19,10 @@ export default function List({ criteries, setCriteries }) {
       </Typography>
       <ul className={styles.list}>
         {Array.isArray(criteries) && criteries.length > 0 ? (
-          criteries.map(criteries => (
+          criteries.map(criteria => (
             <ListItem
-              criteries={criteries}
-              key={criteries._id}
+              criteries={criteria}
+              key={criteria._id}
               setCriteries={setCriteries}
             />
           ))

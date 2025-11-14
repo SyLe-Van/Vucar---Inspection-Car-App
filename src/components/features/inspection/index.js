@@ -401,7 +401,14 @@ export default function InspectionSummary({ rows }) {
         </TableHead>
         <TableBody>
           {rows.map(row => (
-            <Row key={row.car.name + row.status} row={row} />
+            <Row
+              key={
+                row._id ||
+                (row.car && row.car._id) ||
+                `${row.car?.name}-${row.status}`
+              }
+              row={row}
+            />
           ))}
         </TableBody>
       </Table>

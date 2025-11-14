@@ -15,7 +15,6 @@ const StatusSelect = ({
 
   const handleChange = event => {
     const selectedValue = Number(event.target.value);
-    console.log("StatusSelect onChange:", selectedValue);
     if (onChange) {
       onChange(selectedValue);
     }
@@ -24,12 +23,6 @@ const StatusSelect = ({
   // Đảm bảo value luôn là number hợp lệ
   const currentValue = Number(value);
   const isValidValue = [0, 1, 2].includes(currentValue);
-
-  console.log("StatusSelect render:", {
-    originalValue: value,
-    currentValue: currentValue,
-    isValidValue: isValidValue,
-  });
 
   return (
     <FormControl sx={{ minWidth: 250 }}>

@@ -10,7 +10,6 @@ const SelectHandler = ({ onChange, value, label = "Status", name }) => {
 
   const handleChange = e => {
     const selectedValue = e.target.value;
-    console.log("Selected value:", selectedValue); // Debug log
     if (onChange) {
       onChange(selectedValue);
     }
@@ -84,7 +83,6 @@ const SelectHandler = ({ onChange, value, label = "Status", name }) => {
             <MenuItem
               key={option.value}
               value={option.value}
-              onClick={() => console.log("MenuItem clicked:", option.value)} // Debug log
               sx={{
                 padding: "12px 16px",
                 fontSize: "15px",

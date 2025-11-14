@@ -45,10 +45,18 @@ export const appConfig = {
 
   // Database configuration
   database: {
-    // Read MONGODB_URI dynamically at runtime (not cached at build time)
+    // Read MongoDB connection string dynamically at runtime (not cached at build time)
     get url() {
-      const url = process.env.MONGODB_URI;
-      console.log('🔍 [DB Config] Reading MONGODB_URI:', url ? url.substring(0, 20) + '...' : 'undefined');
+      const url = process.env.MONGODB_URI || process.env.MONGODB_URL;
+
+      if (process.env.NODE_ENV === "development") {
+        // Log only whether the URL is configured, without printing secrets
+        console.log(
+          "🔍 [DB Config] MongoDB connection string configured:",
+          Boolean(url)
+        );
+      }
+
       return url!;
     },
     options: {
